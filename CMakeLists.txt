@@ -11,6 +11,15 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(ORVIX_BUILD_TESTS "Build ORVIX tests" ON)
+option(
+    ORVIX_BUILD_TESTS
+    "Build ORVIX tests"
+    ON
+)
+
+if(ORVIX_BUILD_TESTS)
+    include(CTest)
+    enable_testing()
+endif()
 
 add_subdirectory(native)

@@ -2,7 +2,7 @@
 
 | Requirement | Component | Delivery | Test | Status |
 |---|---|---:|---|---|
-| RF-001 | Capture | 1 | TC-CAP-001 | Planned |
+| RF-001 | Capture | 1 | TC-CAP-001 | Implemented |
 | RF-002 | Capture | 1 | TC-CAP-002 | Planned |
 | RF-003 | Capture | 1 | TC-CAP-003 | Planned |
 | RF-004 | Capture | 1 | TC-CAP-004 | Planned |
