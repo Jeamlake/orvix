@@ -1,6 +1,6 @@
 # RF-001 — Media Foundation Device Enumeration
 
-Status: **Implemented on feature branch**
+Status: **Validated**
 
 Issue: **#1**
 
@@ -80,10 +80,22 @@ Device count: 1
 - Zero-device path handled without crashing: **IMPLEMENTED**
 - Local build: **PASS**
 - Hardware-independent tests: **PASS**
-- CI: **PENDING FEATURE BRANCH RUN**
+- CI: **PASS**
 - Traceability updated: **PASS**
 
 ## Privacy
 
 The repository evidence intentionally redacts the workstation-specific
 camera symbolic link.
+
+## GitHub Actions validation
+
+The RF-001 implementation was validated by the repository CI workflow.
+
+- status: completed
+- conclusion: success
+- commit: af4e298e4ddca13e5f3d0fb86a2213ed386e8c4b
+- run: https://github.com/Jeamlake/orvix/actions/runs/33388027430
+
+The CI workflow validates the hardware-independent native build and tests.
+Real Media Foundation camera enumeration is validated separately on the development workstation.
