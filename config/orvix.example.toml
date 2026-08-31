@@ -1,0 +1,14 @@
+[capture]
+device_index = 0
+width = 1280
+height = 720
+fps = 30
+
+[logging]
+level = "INFO"
+
+[vision]
+mode = "raw"
+
+[telemetry]
+sample_interval_seconds = 1

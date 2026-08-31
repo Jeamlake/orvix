@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "orvix"
+version = "0.1.0"
+description = "Optical Real-time Video Ingestion eXchange"
+requires-python = ">=3.11,<3.12"
+license = {text = "MIT"}
+dependencies = []
+
+[project.optional-dependencies]
+vision = [
+    "numpy>=1.26,<3",
+    "opencv-python>=4.9,<5"
+]
+dev = [
+    "pytest>=8,<9"
+]
+
+[tool.setuptools]
+package-dir = {"" = "python/src"}
+
+[tool.setuptools.packages.find]
+where = ["python/src"]
+
+[tool.pytest.ini_options]
+testpaths = ["python/tests"]
+addopts = "-ra"
