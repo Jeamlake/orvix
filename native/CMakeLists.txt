@@ -1,6 +1,7 @@
 add_library(
     orvix_capture_core
     STATIC
+    src/capture/camera_selector.cpp
     src/capture/hresult_error.cpp
     src/capture/media_foundation_device_enumerator.cpp
 )
@@ -76,9 +77,28 @@ if(ORVIX_BUILD_TESTS)
         orvix_capture_core
     )
 
+    add_executable(
+        camera_selector_tests
+        tests/camera_selector_tests.cpp
+    )
+
+    target_link_libraries(
+        camera_selector_tests
+        PRIVATE
+        orvix_capture_core
+    )
+
     if(MSVC)
         target_compile_options(
             camera_device_tests
+            PRIVATE
+            /W4
+            /permissive-
+            /EHsc
+        )
+
+        target_compile_options(
+            camera_selector_tests
             PRIVATE
             /W4
             /permissive-
@@ -94,5 +114,21 @@ if(ORVIX_BUILD_TESTS)
     add_test(
         NAME TC_CAP_001_CLI_HELP
         COMMAND orvix_capture --help
+    )
+
+    add_test(
+        NAME TC_CAP_002_CAMERA_SELECTION
+        COMMAND camera_selector_tests
+    )
+
+    add_test(
+        NAME TC_CAP_002_CLI_INVALID_INDEX
+        COMMAND orvix_capture select --index 999999
+    )
+
+    set_tests_properties(
+        TC_CAP_002_CLI_INVALID_INDEX
+        PROPERTIES
+        WILL_FAIL TRUE
     )
 endif()
