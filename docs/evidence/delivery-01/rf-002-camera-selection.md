@@ -1,6 +1,6 @@
 # RF-002 - Camera Selection
 
-Status: **Implemented on feature branch**
+Status: **Validated**
 
 Issue: **#3 1**
 
@@ -46,7 +46,7 @@ Selection status: READY_FOR_OPEN
 - CameraSelector invalid selection: PASS
 - CameraSelector empty list handling: PASS
 - CTest: PASS
-- CI: PENDING FEATURE BRANCH RUN
+- CI: PASS
 
 ## Acceptance status
 
@@ -55,3 +55,10 @@ Selection status: READY_FOR_OPEN
 - Selection logic independent from Media Foundation: PASS
 - GENERAL WEBCAM selected on development workstation: PASS
 - Traceability updated: PASS
+
+## GitHub Actions validation
+
+- status: completed
+- conclusion: success
+- commit: dfacfc64865078a1af4a909db60a577d597dede6
+- run: https://github.com/Jeamlake/orvix/actions/runs/33390474864
