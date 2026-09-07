@@ -1,5 +1,7 @@
 # Security Policy
 
+[English](SECURITY.md) | [Español](SECURITY.es.md)
+
 ORVIX interacts with camera hardware.
 
 - Frames are ephemeral by default.

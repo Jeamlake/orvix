@@ -29,7 +29,7 @@ returns its documented non-zero exit code.
 Invalid-index command:
 
 ```powershell
-./out/rf005-rf026-final-validation/native/Release/orvix-capture.exe capture --index 999999
+.\build\native\Release\orvix-capture.exe capture --index 999999
 $LASTEXITCODE
 ```
 
