@@ -20,7 +20,7 @@ hardware-independent logic is also exercised by CTest and GitHub Actions.
 | Capture FPS | RF-015 / CA-006 | PASS | [RF-015](rf-015-capture-fps.md) |
 | Camera diagnostics | RF-023 / CA-007 | PASS | [RF-023](rf-023-camera-failure-handling.md) |
 | Structured logging | RF-026 | PASS | [RF-026](rf-026-structured-logging.md) |
-| Automated validation | CA-009 | PASS | Requirement evidence pages record the applicable CI run. |
+| Automated validation | CA-009 | PASS | [GitHub Actions validation](#github-actions-validation) |
 
 ## Reproduction
 
@@ -38,6 +38,20 @@ The last command activates the physical webcam. Its expected proof is 120
 per-frame records, `Frames captured: 120`, `First sequence: 1`, `Last sequence:
 120`, `Sequence status: STRICTLY_INCREASING` and `Capture status:
 CAPTURE_COMPLETED`.
+
+## GitHub Actions validation
+
+- status: completed
+- conclusion: success
+- commit: d42a7adfe18c74d8daf76b29f553e83d06913c60
+- run: https://github.com/Jeamlake/orvix/actions/runs/34084335173
+- Native C++ Validation: **PASS**
+- Python Validation: **PASS**
+
+The native job performs a clean MSVC build and runs all 13 CTest entries. The
+Python job installs the package on Python 3.11 and runs pytest. Camera hardware
+is not required by either CI job; the physical Media Foundation capture is
+recorded in the requirement evidence pages.
 
 ## Delivery boundary
 
