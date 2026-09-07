@@ -8,8 +8,10 @@ The case permits Media Foundation or DirectShow on Windows.
 
 ## Decision
 
-Use Windows Media Foundation.
+Use Windows Media Foundation for the Windows implementation of the common
+camera interface.
 
 ## Consequences
 
-Native capture depends on Windows SDK APIs.
+The Windows backend depends on Windows SDK APIs. Linux and macOS compile their
+own native backends without this dependency, as defined by ADR-0012.

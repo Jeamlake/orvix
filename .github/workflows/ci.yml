@@ -29,13 +29,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Configure Windows
         if: runner.os == 'Windows'
         run: cmake -S . -B build -A x64
       - name: Configure Unix
         if: runner.os != 'Windows'
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Validate Unix scripts
+        if: runner.os != 'Windows'
+        run: sh -n scripts/setup.sh scripts/build.sh scripts/test.sh
       - name: Build
         run: cmake --build build --config Release --parallel
       - name: Test
@@ -53,9 +56,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
       - name: Install
@@ -70,9 +73,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Python 3.8
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.8"
       - name: Install

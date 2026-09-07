@@ -4,6 +4,15 @@
 
 ### Added
 
+- Platform-neutral native camera contract and build-time backend factory.
+- Linux V4L2 device enumeration, format negotiation and memory-mapped capture.
+- macOS AVFoundation device enumeration, format negotiation and sample-buffer
+  capture, including an embedded camera privacy description.
+- Native and Python CI coverage on Windows, Ubuntu and macOS.
+- Shell setup, build and test scripts for Linux and macOS.
+- Python 3.8 compatibility path for the Windows 7 legacy target.
+- Cross-platform installation, permissions and runtime documentation.
+
 - Native camera format discovery and negotiation with an initial 1280x720 at
   30 FPS target.
 - `orvix-capture formats --index <N>` native CLI command.

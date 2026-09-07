@@ -1,6 +1,6 @@
 # ADR: Windows as Initial Platform
 
-Status: **Accepted**
+Status: **Superseded by ADR-0012**
 
 ## Context
 
@@ -8,8 +8,10 @@ The assigned case permits Windows or Linux native video APIs.
 
 ## Decision
 
-ORVIX 1.0 targets Windows x64.
+ORVIX initially targeted Windows x64. ADR-0012 replaces this decision with
+native Windows, Linux and macOS backends.
 
 ## Consequences
 
-Linux/V4L2 is deferred while capture APIs remain encapsulated.
+This decision records the original Delivery 1 scope and no longer defines the
+supported platform set.

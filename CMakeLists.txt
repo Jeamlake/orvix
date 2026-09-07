@@ -21,6 +21,19 @@ option(
     ON
 )
 
+option(
+    ORVIX_WINDOWS_7_COMPAT
+    "Restrict the Windows build to Windows 7 SP1-compatible APIs and static MSVC runtime"
+    ON
+)
+
+if(MSVC AND ORVIX_WINDOWS_7_COMPAT)
+    set(
+        CMAKE_MSVC_RUNTIME_LIBRARY
+        "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    )
+endif()
+
 if(ORVIX_BUILD_TESTS)
     include(CTest)
     enable_testing()

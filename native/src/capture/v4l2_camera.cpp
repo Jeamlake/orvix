@@ -13,9 +13,11 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <ratio>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -79,6 +81,12 @@ std::string pixel_format_name(const std::uint32_t value) {
         return fourcc;
     }
     }
+}
+
+bool compressed_pixel_format(const std::uint32_t value) noexcept {
+    return
+        value == V4L2_PIX_FMT_MJPEG ||
+        value == V4L2_PIX_FMT_H264;
 }
 
 bool compressed_format(
@@ -305,9 +313,15 @@ public:
             throw_system_error("VIDIOC_DQBUF");
         }
 
-        const std::int64_t timestamp =
+        std::int64_t timestamp =
             static_cast<std::int64_t>(buffer.timestamp.tv_sec) * 10'000'000LL +
             static_cast<std::int64_t>(buffer.timestamp.tv_usec) * 10LL;
+
+        if (timestamp <= 0) {
+            timestamp = std::chrono::duration_cast<
+                std::chrono::duration<std::int64_t, std::ratio<1, 10'000'000>>
+            >(std::chrono::steady_clock::now().time_since_epoch()).count();
+        }
         const std::size_t byte_count = buffer.bytesused;
 
         if (retry_ioctl(descriptor_, VIDIOC_QBUF, &buffer) < 0) {
@@ -498,6 +512,9 @@ VideoFormat V4l2Camera::configure(const VideoFormatTarget& target) {
     configured.width = requested.fmt.pix.width;
     configured.height = requested.fmt.pix.height;
     configured.pixel_format = pixel_format_name(requested.fmt.pix.pixelformat);
+    configured.compressed = compressed_pixel_format(
+        requested.fmt.pix.pixelformat
+    );
 
     if (
         parameter_result == 0 &&

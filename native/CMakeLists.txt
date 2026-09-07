@@ -69,12 +69,19 @@ else()
 endif()
 
 if(WIN32)
+    if(ORVIX_WINDOWS_7_COMPAT)
+        set(ORVIX_WINDOWS_VERSION 0x0601)
+    else()
+        set(ORVIX_WINDOWS_VERSION 0x0A00)
+    endif()
+
     target_compile_definitions(
         orvix_capture_core
         PRIVATE
         WIN32_LEAN_AND_MEAN
         NOMINMAX
-        _WIN32_WINNT=0x0601
+        WINVER=${ORVIX_WINDOWS_VERSION}
+        _WIN32_WINNT=${ORVIX_WINDOWS_VERSION}
     )
 
     target_link_libraries(
@@ -224,6 +231,11 @@ if(ORVIX_BUILD_TESTS)
     add_test(
         NAME TC_CAP_001_CLI_HELP
         COMMAND orvix_capture --help
+    )
+
+    add_test(
+        NAME TC_CAP_001_CLI_DEVICE_ENUMERATION
+        COMMAND orvix_capture devices
     )
 
     add_test(

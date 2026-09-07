@@ -58,3 +58,6 @@ recorded in the requirement evidence pages.
 Delivery 1 ends at native Media Foundation capture, per-frame metadata, capture
 FPS and diagnostics. Shared-memory transport and Python consumption begin in
 Delivery 2. Frames remain ephemeral and no camera image is saved by default.
+
+The later native portability extension is recorded in
+[`docs/evidence/cross-platform-native-validation.md`](../cross-platform-native-validation.md).

@@ -6,10 +6,10 @@
 Physical Camera
       |
       v
-Windows Driver
+Operating-system camera driver
       |
       v
-Media Foundation
+Native capture backend
       |
       v
 ORVIX Capture
@@ -38,24 +38,38 @@ Large frame payloads move through shared memory.
 
 Small future commands may include START, STOP, SET_RESOLUTION, SET_FPS and GET_STATUS. The exact mechanism is intentionally deferred.
 
-## Initial Platform
+## Supported Platforms
 
-Windows x64.
+The common capture contract is implemented by one native backend per operating
+system:
 
-## Capture Backend
+```text
+Camera interface
+      |
+      +-- Windows -> Media Foundation
+      +-- Linux   -> V4L2
+      +-- macOS   -> AVFoundation
+```
 
-Windows Media Foundation.
+CMake compiles exactly one backend. Platform headers and libraries remain out
+of the common CLI, sequence, metadata, FPS and logging modules.
 
-The native capture flow owns the `IMFMediaSource` and `IMFSourceReader`, keeps
-the configured media type, and assigns a monotonically increasing ORVIX
-sequence number to each accepted sample. Media Foundation presentation
-timestamps remain in their native 100-nanosecond units and provide the elapsed
-media time used to calculate effective capture FPS.
+## Capture Backends
+
+- Windows uses `IMFMediaSource` and `IMFSourceReader`.
+- Linux uses V4L2 streaming I/O with kernel memory-mapped buffers.
+- macOS uses `AVCaptureSession` and `AVCaptureVideoDataOutput` callbacks.
+
+Each native capture flow owns its operating-system resources, keeps the
+configured media type and assigns a monotonically increasing ORVIX sequence
+number to every accepted sample. Native timestamps are normalized to
+100-nanosecond units and provide the elapsed media time used to calculate
+effective capture FPS.
 
 ## Native Observability
 
 ```text
-Media Foundation result / stream flag
+Native backend result / stream state
                  |
                  v
 Stable ORV-CAP diagnostic

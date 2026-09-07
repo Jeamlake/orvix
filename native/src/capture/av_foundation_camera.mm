@@ -101,6 +101,7 @@ struct NativeFormat final {
     VideoFormat format;
     __strong AVCaptureDeviceFormat* native_format{nil};
     CMTime frame_duration{kCMTimeInvalid};
+    FourCharCode pixel_format{};
 };
 
 std::string utf8_string(NSString* value) {
@@ -218,7 +219,8 @@ std::vector<NativeFormat> enumerate_formats(
                     compressed_format(subtype)
                 },
                 native_format,
-                frame_duration
+                frame_duration,
+                subtype
             });
         }
     }
@@ -501,6 +503,30 @@ VideoFormat AvFoundationCamera::configure(const VideoFormatTarget& target) {
             [[AVCaptureVideoDataOutput alloc] init];
         output.alwaysDiscardsLateVideoFrames = NO;
 
+        FourCharCode output_pixel_format = native.pixel_format;
+        NSNumber* requested_pixel_format = @(output_pixel_format);
+        if (![
+            output.availableVideoCVPixelFormatTypes
+            containsObject:requested_pixel_format
+        ]) {
+            requested_pixel_format =
+                output.availableVideoCVPixelFormatTypes.firstObject;
+
+            if (requested_pixel_format == nil) {
+                delegate.sampleQueueContext = nullptr;
+                throw std::runtime_error(
+                    "AVFoundation did not expose an output pixel format."
+                );
+            }
+
+            output_pixel_format = requested_pixel_format.unsignedIntValue;
+        }
+
+        output.videoSettings = @{
+            (NSString*)kCVPixelBufferPixelFormatTypeKey:
+                requested_pixel_format
+        };
+
         dispatch_queue_t callback_queue = dispatch_queue_create(
             "com.orvix.capture.frames",
             DISPATCH_QUEUE_SERIAL
@@ -520,9 +546,12 @@ VideoFormat AvFoundationCamera::configure(const VideoFormatTarget& target) {
         impl_->delegate = delegate;
         impl_->output = output;
         impl_->callback_queue = callback_queue;
-        impl_->configured_format = selected;
+        VideoFormat configured = selected;
+        configured.pixel_format = pixel_format_name(output_pixel_format);
+        configured.compressed = false;
+        impl_->configured_format = configured;
         impl_->format_configured = true;
-        return selected;
+        return configured;
     }
 }
 
