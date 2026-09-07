@@ -1,6 +1,7 @@
 #include "orvix/capture/media_foundation_camera.hpp"
 
 #include "orvix/capture/continuous_frame_capture.hpp"
+#include "orvix/capture/diagnostic_error.hpp"
 #include "orvix/capture/hresult_error.hpp"
 #include "orvix/capture/media_foundation_runtime.hpp"
 #include "orvix/capture/video_format_selector.hpp"
@@ -207,19 +208,37 @@ public:
             &sample
         );
 
+        if (
+            result == MF_E_VIDEO_RECORDING_DEVICE_INVALIDATED ||
+            result == HRESULT_FROM_WIN32(ERROR_DEVICE_NOT_CONNECTED)
+        ) {
+            throw DiagnosticError(
+                "ORV-CAP-503",
+                "camera_disconnected",
+                "The camera was disconnected or invalidated during capture.",
+                74
+            );
+        }
+
         if (FAILED(result)) {
             throw HResultError(result, "IMFSourceReader::ReadSample");
         }
 
         if ((stream_flags & MF_SOURCE_READERF_ERROR) != 0) {
-            throw std::runtime_error(
-                "The Media Foundation source reader reported an error."
+            throw DiagnosticError(
+                "ORV-CAP-503",
+                "camera_stream_error",
+                "The camera stream reported a device error.",
+                74
             );
         }
 
         if ((stream_flags & MF_SOURCE_READERF_ENDOFSTREAM) != 0) {
-            throw std::runtime_error(
-                "The camera stream ended before capture completed."
+            throw DiagnosticError(
+                "ORV-CAP-503",
+                "camera_stream_ended",
+                "The camera stream ended before capture completed.",
+                74
             );
         }
 
@@ -227,8 +246,11 @@ public:
             (stream_flags & MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED) != 0 ||
             (stream_flags & MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) != 0
         ) {
-            throw std::runtime_error(
-                "The camera format changed during capture."
+            throw DiagnosticError(
+                "ORV-CAP-505",
+                "camera_format_changed",
+                "The camera format changed during capture.",
+                75
             );
         }
 
@@ -261,6 +283,7 @@ struct MediaFoundationCamera::Impl final {
     MediaFoundationRuntime media_foundation_runtime;
     ComPtr<IMFMediaSource> media_source;
     ComPtr<IMFSourceReader> source_reader;
+    VideoFormat configured_format;
     bool format_configured{false};
 };
 
@@ -374,6 +397,7 @@ void MediaFoundationCamera::close() noexcept {
     }
 
     impl_->source_reader.Reset();
+    impl_->configured_format = {};
     impl_->format_configured = false;
 
     if (impl_->media_source != nullptr) {
@@ -478,6 +502,7 @@ VideoFormat MediaFoundationCamera::configure(const VideoFormatTarget& target) {
     }
 
     impl_->format_configured = true;
+    impl_->configured_format = configured;
     return configured;
 }
 
@@ -497,7 +522,11 @@ CaptureSummary MediaFoundationCamera::capture_frames(
     }
 
     MediaFoundationFrameReader reader(impl_->source_reader.Get());
-    return ContinuousFrameCapture::run(reader, requested_frames);
+    return ContinuousFrameCapture::run(
+        reader,
+        requested_frames,
+        impl_->configured_format
+    );
 }
 
 bool MediaFoundationCamera::is_open() const noexcept {

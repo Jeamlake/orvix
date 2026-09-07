@@ -93,7 +93,15 @@ orvix-capture capture --index <N>
 
 The `capture` command opens the selected camera, negotiates the closest native
 format to the initial 1280x720 at 30 FPS target and reads 120 consecutive video
-samples.
+samples. It reports sequence, Media Foundation timestamp, resolution, pixel
+format and byte count for every frame, followed by the measured capture FPS.
+
+Every command writes structured lifecycle and failure diagnostics to
+`logs/orvix-capture.log`. Expected failures include a stable diagnostic code
+and a non-zero process exit code.
+
+Delivery 1 validation records are indexed in
+[`docs/evidence/delivery-01/README.md`](docs/evidence/delivery-01/README.md).
 
 ## Privacy
 
@@ -101,7 +109,7 @@ Frames are ephemeral by default and are not persisted automatically.
 
 ## Current milestone
 
-**Delivery 1 — Foundation + Native Capture**
+**Delivery 1 — Foundation + Native Capture (functional scope complete)**
 
 ## License
 

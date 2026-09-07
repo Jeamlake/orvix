@@ -10,6 +10,16 @@
 - Continuous Media Foundation sample acquisition for RF-004.
 - `orvix-capture capture --index <N>` native CLI command.
 - Hardware-independent tests for format selection and frame sequencing.
+- Per-frame sequence, timestamp, resolution, pixel format and byte-size
+  metadata for RF-005.
+- Effective capture-FPS measurement based on Media Foundation timestamps for
+  RF-015.
+- Stable diagnostic codes and exit codes for missing cameras, invalid indexes,
+  opening failures, stream failures, device invalidation and format changes for
+  RF-023.
+- Structured capture lifecycle and failure logging in
+  `logs/orvix-capture.log` for RF-026.
+- Delivery 1 evidence index and capture diagnostics reference.
 
 - Media Foundation opening of the selected camera for RF-003.
 - `orvix-capture open --index <N>` native CLI command.
