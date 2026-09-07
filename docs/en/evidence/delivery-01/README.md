@@ -1,10 +1,11 @@
 # Delivery 1 — Foundation and Native Capture
 
-Status: **Functionally complete on the development workstation**
+Status: **Functional scope complete; Windows hardware validated**
 
 This directory collects the reproducible evidence for the first graded ORVIX
-delivery. Native camera behavior is validated on the development workstation;
-hardware-independent logic is also exercised by CTest and GitHub Actions.
+delivery. Native camera behavior is validated on the Windows development
+workstation; hardware-independent logic and platform backends are exercised by
+CTest and GitHub Actions on Windows, Linux and macOS.
 
 ## Evidence index
 
@@ -24,15 +25,17 @@ hardware-independent logic is also exercised by CTest and GitHub Actions.
 
 ## Reproduction
 
-From a Visual Studio Developer PowerShell in the repository root:
+From Git Bash in the repository root on Windows:
 
-```powershell
-cmake -S . -B out/delivery-01-validation -DORVIX_BUILD_TESTS=ON
-cmake --build out/delivery-01-validation --config Release --parallel
-ctest --test-dir out/delivery-01-validation -C Release --output-on-failure
-./out/delivery-01-validation/native/Release/orvix-capture.exe devices
-./out/delivery-01-validation/native/Release/orvix-capture.exe capture --index 0
+```bash
+./scripts/setup.sh
+./scripts/build.sh
+./scripts/test.sh
+./build/native/Release/orvix-capture.exe devices
+./build/native/Release/orvix-capture.exe capture --index 0
 ```
+
+On Linux and macOS, the executable path is `./build/native/orvix-capture`.
 
 The last command activates the physical webcam. Its expected proof is 120
 per-frame records, `Frames captured: 120`, `First sequence: 1`, `Last sequence:
@@ -43,21 +46,21 @@ CAPTURE_COMPLETED`.
 
 - status: completed
 - conclusion: success
-- commit: d42a7adfe18c74d8daf76b29f553e83d06913c60
-- run: https://github.com/Jeamlake/orvix/actions/runs/34084335173
-- Native C++ Validation: **PASS**
-- Python Validation: **PASS**
+- commit: 4e37418f655d65d5dbbb444d615c31e929329982
+- run: https://github.com/Jeamlake/orvix/actions/runs/34170322943
+- Native C++ on Windows, Linux and macOS: **PASS**
+- Python 3.11 on Windows, Linux and macOS: **PASS**
+- Python 3.8 compatibility: **PASS**
 
-The native job performs a clean MSVC build and runs all 13 CTest entries. The
-Python job installs the package on Python 3.11 and runs pytest. Camera hardware
-is not required by either CI job; the physical Media Foundation capture is
-recorded in the requirement evidence pages.
+The CI jobs perform clean native builds and run all 14 CTest entries. Camera
+hardware is not required by CI; physical Windows capture is recorded in the
+requirement evidence pages.
 
 ## Delivery boundary
 
-Delivery 1 ends at native Media Foundation capture, per-frame metadata, capture
-FPS and diagnostics. Shared-memory transport and Python consumption begin in
-Delivery 2. Frames remain ephemeral and no camera image is saved by default.
+Delivery 1 ends at native capture, per-frame metadata, capture FPS and
+diagnostics. Shared-memory transport and Python consumption begin in Delivery
+2. Frames remain ephemeral and no camera image is saved by default.
 
 The later native portability extension is recorded in
-[`docs/evidence/cross-platform-native-validation.md`](../cross-platform-native-validation.md).
+[`docs/en/evidence/cross-platform-native-validation.md`](../cross-platform-native-validation.md).

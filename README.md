@@ -1,5 +1,7 @@
 # ORVIX
 
+[English](README.md) | [Español](README.es.md)
+
 **Optical Real-time Video Ingestion eXchange**
 
 ORVIX is a modular real-time video ingestion and computer vision platform developed for the course **Programación de Interfaces y Dispositivos Periféricos**.
@@ -93,7 +95,7 @@ Dashboard, configuration, recovery, automated testing, benchmarks, reproducibili
 | macOS | AVFoundation | CI validated |
 
 Build prerequisites and platform-specific camera permissions are documented in
-[`docs/platform/compatibility.md`](docs/platform/compatibility.md).
+[`docs/en/platform/compatibility.md`](docs/en/platform/compatibility.md).
 
 ## Native capture CLI
 
@@ -115,7 +117,10 @@ Every command writes structured lifecycle and failure diagnostics to
 and a non-zero process exit code.
 
 Delivery 1 validation records are indexed in
-[`docs/evidence/delivery-01/README.md`](docs/evidence/delivery-01/README.md).
+[`docs/en/evidence/delivery-01/README.md`](docs/en/evidence/delivery-01/README.md).
+
+The complete documentation is available in [English](docs/en/README.md) and
+[Spanish](docs/es/README.md).
 
 ## Privacy
 

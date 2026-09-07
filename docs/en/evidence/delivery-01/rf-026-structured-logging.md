@@ -42,4 +42,4 @@ file afterward.
 - frame image data omitted: **PASS**
 
 The full code and event catalog is maintained in
-[`docs/observability/capture-diagnostics.md`](../../observability/capture-diagnostics.md).
+[`docs/en/observability/capture-diagnostics.md`](../../observability/capture-diagnostics.md).

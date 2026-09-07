@@ -24,7 +24,7 @@ media time, layout and payload size without persisting the image.
 Command:
 
 ```powershell
-./out/rf005-rf026-final-validation/native/Release/orvix-capture.exe capture --index 0
+./build/native/Release/orvix-capture.exe capture --index 0
 ```
 
 Representative output:

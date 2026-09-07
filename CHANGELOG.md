@@ -1,15 +1,21 @@
 # Changelog
 
+[English](CHANGELOG.md) | [Español](CHANGELOG.es.md)
+
+[English](CHANGELOG.md) | [Español](CHANGELOG.es.md)
+
 ## [Unreleased]
 
 ### Added
 
+- Parallel English and Spanish documentation sections with equivalent
+  architecture, requirements, platform, decision and validation records.
 - Platform-neutral native camera contract and build-time backend factory.
 - Linux V4L2 device enumeration, format negotiation and memory-mapped capture.
 - macOS AVFoundation device enumeration, format negotiation and sample-buffer
   capture, including an embedded camera privacy description.
 - Native and Python CI coverage on Windows, Ubuntu and macOS.
-- Shell setup, build and test scripts for Linux and macOS.
+- Shell setup, build and test scripts for Linux, macOS and Git Bash on Windows.
 - Python 3.8 compatibility path for the Windows 7 legacy target.
 - Cross-platform installation, permissions and runtime documentation.
 
