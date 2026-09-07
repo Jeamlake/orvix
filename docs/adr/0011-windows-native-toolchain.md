@@ -1,6 +1,6 @@
 # ADR: Windows Native Toolchain
 
-Status: **Accepted**
+Status: **Accepted for Windows**
 
 ## Context
 
@@ -8,8 +8,9 @@ Environment validation confirmed the installed Microsoft toolchain.
 
 ## Decision
 
-Use MSVC, Windows SDK, CMake and Ninja.
+Use MSVC, Windows SDK and CMake for Windows builds.
 
 ## Consequences
 
-MinGW, GCC and Clang are not ORVIX 1.0 dependencies.
+GCC is used for Linux and Apple Clang is used for macOS. MinGW is not a tested
+Windows toolchain.

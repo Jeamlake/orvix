@@ -2,21 +2,19 @@
 
 #include "orvix/capture/camera.hpp"
 
-#include <cstddef>
 #include <memory>
-#include <vector>
 
 namespace orvix::capture {
 
-class MediaFoundationCamera final : public Camera {
+class AvFoundationCamera final : public Camera {
 public:
-    MediaFoundationCamera();
-    ~MediaFoundationCamera() override;
+    AvFoundationCamera();
+    ~AvFoundationCamera() override;
 
-    MediaFoundationCamera(const MediaFoundationCamera&) = delete;
-    MediaFoundationCamera& operator=(const MediaFoundationCamera&) = delete;
-    MediaFoundationCamera(MediaFoundationCamera&&) = delete;
-    MediaFoundationCamera& operator=(MediaFoundationCamera&&) = delete;
+    AvFoundationCamera(const AvFoundationCamera&) = delete;
+    AvFoundationCamera& operator=(const AvFoundationCamera&) = delete;
+    AvFoundationCamera(AvFoundationCamera&&) = delete;
+    AvFoundationCamera& operator=(AvFoundationCamera&&) = delete;
 
     void open(const CameraDevice& device) override;
     void close() noexcept override;

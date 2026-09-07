@@ -8,7 +8,7 @@ Version: 0.1
 |---|---|---|---|
 | RF-001 | Enumerate available video capture devices. | Critical | 1 |
 | RF-002 | Allow selection of a capture device. | Critical | 1 |
-| RF-003 | Open the selected device using Media Foundation from C++. | Critical | 1 |
+| RF-003 | Open the selected device from C++ using the operating system's native camera API. | Critical | 1 |
 | RF-004 | Continuously acquire frames. | Critical | 1 |
 | RF-005 | Expose frame metadata. | Critical | 1 |
 | RF-006 | Publish frames through shared memory. | Critical | 2 |
@@ -32,6 +32,7 @@ Version: 0.1
 | RF-024 | Vision failure must not necessarily terminate capture. | High | 2 |
 | RF-025 | Provide a synthetic frame source. | High | 2 |
 | RF-026 | Log relevant events and failures. | High | 1 |
+| RF-027 | Provide native capture backends for Windows, Linux and macOS behind one common interface. | Critical | 1 |
 
 ## Architectural Requirement
 
@@ -42,7 +43,7 @@ Python shall not directly access the camera during the normal ORVIX execution pa
 ```text
 Camera
 -> Driver
--> Media Foundation
+-> Native OS backend
 -> C++
 -> Shared Memory
 -> Python
@@ -64,6 +65,7 @@ Camera
 - RNF-010 Frames are not persisted by default.
 - RNF-011 Controlled diagnostics for expected failures.
 - RNF-012 Explicit IPC protocol versioning.
+- RNF-013 Windows, Linux and macOS source and build portability.
 
 ## Delivery 1 Acceptance Criteria
 
@@ -78,3 +80,4 @@ Camera
 | CA-007 | Expected camera failures produce diagnostics. |
 | CA-008 | Clean checkout can be built using documentation. |
 | CA-009 | Hardware-independent CI succeeds. |
+| CA-010 | The native core builds and tests on Windows, Linux and macOS. |

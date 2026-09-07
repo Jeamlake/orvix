@@ -20,3 +20,4 @@
 | RF-023 | Capture | 1 | TC-CAP-023 | Verified |
 | RF-025 | Test Infrastructure | 2 | TC-SYN-001 | Planned |
 | RF-026 | All | 1 | TC-LOG-001 | Verified |
+| RF-027 | Capture | 1 | TC-CAP-003-PLATFORM | Verified |

@@ -27,7 +27,7 @@ int pixel_format_rank(const std::string_view pixel_format) noexcept {
         return 1;
     }
 
-    if (pixel_format == "RGB32") {
+    if (pixel_format == "RGB32" || pixel_format == "BGRA32") {
         return 2;
     }
 

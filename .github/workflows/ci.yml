@@ -14,28 +14,69 @@ on:
 
 jobs:
   native:
-    name: Native C++ Validation
-    runs-on: windows-latest
+    name: Native C++ (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: Windows-Media-Foundation
+          - os: ubuntu-latest
+            platform: Linux-V4L2
+          - os: macos-latest
+            platform: macOS-AVFoundation
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      - name: Configure
+        uses: actions/checkout@v5
+      - name: Configure Windows
+        if: runner.os == 'Windows'
         run: cmake -S . -B build -A x64
+      - name: Configure Unix
+        if: runner.os != 'Windows'
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Validate portable shell scripts
+        shell: bash
+        run: sh -n scripts/setup.sh scripts/build.sh scripts/test.sh
       - name: Build
         run: cmake --build build --config Release --parallel
       - name: Test
         run: ctest --test-dir build -C Release --output-on-failure
 
   python:
-    name: Python Validation
+    name: Python 3.11 (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Test
+        run: python -m pytest
+
+  python-legacy:
+    name: Python 3.8 compatibility
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      - name: Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/checkout@v5
+      - name: Python 3.8
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.8"
       - name: Install
         run: |
           python -m pip install --upgrade pip
