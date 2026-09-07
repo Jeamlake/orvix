@@ -36,6 +36,22 @@ ctest --test-dir build -C Release --output-on-failure
 
 Allow desktop applications to use the camera in Windows privacy settings.
 
+### Git Bash on Windows
+
+The portable shell scripts detect Git Bash (`MINGW`, `MSYS` or `CYGWIN`) and
+select the Windows virtual-environment layout and Visual Studio generator:
+
+```bash
+./scripts/setup.sh
+./scripts/build.sh
+./scripts/test.sh
+./build/native/Release/orvix-capture.exe devices
+./build/native/Release/orvix-capture.exe capture --index 0
+```
+
+Use forward slashes in Git Bash. The PowerShell `.ps1` scripts remain available
+for PowerShell terminals.
+
 ## Windows 7 SP1 legacy target
 
 Use Visual Studio 2019 with the v142 C++ toolset, an SDK that can target Windows

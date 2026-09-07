@@ -35,8 +35,8 @@ jobs:
       - name: Configure Unix
         if: runner.os != 'Windows'
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-      - name: Validate Unix scripts
-        if: runner.os != 'Windows'
+      - name: Validate portable shell scripts
+        shell: bash
         run: sh -n scripts/setup.sh scripts/build.sh scripts/test.sh
       - name: Build
         run: cmake --build build --config Release --parallel
