@@ -31,7 +31,13 @@ std::string utc_timestamp() {
     const std::time_t value = std::chrono::system_clock::to_time_t(now);
     std::tm utc{};
 
-    if (gmtime_s(&utc, &value) != 0) {
+#if defined(_WIN32)
+    const bool conversion_failed = gmtime_s(&utc, &value) != 0;
+#else
+    const bool conversion_failed = gmtime_r(&value, &utc) == nullptr;
+#endif
+
+    if (conversion_failed) {
         throw std::runtime_error("Unable to create a UTC log timestamp.");
     }
 
