@@ -5,7 +5,7 @@
 | RF-001 | Capture | 1 | TC-CAP-001 | Verified |
 | RF-002 | Capture | 1 | TC-CAP-002 | Verified |
 | RF-003 | Capture | 1 | TC-CAP-003 | Verified |
-| RF-004 | Capture | 1 | TC-CAP-004 | Planned |
+| RF-004 | Capture | 1 | TC-CAP-004 | Verified |
 | RF-005 | Capture | 1 | TC-CAP-005 | Planned |
 | RF-006 | Bridge | 2 | TC-IPC-001 | Planned |
 | RF-007 | Vision | 2 | TC-IPC-005 | Planned |

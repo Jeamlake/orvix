@@ -2,10 +2,12 @@ add_library(
     orvix_capture_core
     STATIC
     src/capture/camera_selector.cpp
+    src/capture/continuous_frame_capture.cpp
     src/capture/hresult_error.cpp
     src/capture/media_foundation_camera.cpp
     src/capture/media_foundation_device_enumerator.cpp
     src/capture/media_foundation_runtime.cpp
+    src/capture/video_format_selector.cpp
 )
 
 target_include_directories(
@@ -101,6 +103,28 @@ if(ORVIX_BUILD_TESTS)
         orvix_capture_core
     )
 
+    add_executable(
+        video_format_selector_tests
+        tests/video_format_selector_tests.cpp
+    )
+
+    target_link_libraries(
+        video_format_selector_tests
+        PRIVATE
+        orvix_capture_core
+    )
+
+    add_executable(
+        continuous_frame_capture_tests
+        tests/continuous_frame_capture_tests.cpp
+    )
+
+    target_link_libraries(
+        continuous_frame_capture_tests
+        PRIVATE
+        orvix_capture_core
+    )
+
     if(MSVC)
         target_compile_options(
             camera_device_tests
@@ -120,6 +144,22 @@ if(ORVIX_BUILD_TESTS)
 
         target_compile_options(
             media_foundation_camera_tests
+            PRIVATE
+            /W4
+            /permissive-
+            /EHsc
+        )
+
+        target_compile_options(
+            video_format_selector_tests
+            PRIVATE
+            /W4
+            /permissive-
+            /EHsc
+        )
+
+        target_compile_options(
+            continuous_frame_capture_tests
             PRIVATE
             /W4
             /permissive-
@@ -157,9 +197,25 @@ if(ORVIX_BUILD_TESTS)
         COMMAND orvix_capture open --index 999999
     )
 
+    add_test(
+        NAME TC_CAP_FORMAT_NEGOTIATION
+        COMMAND video_format_selector_tests
+    )
+
+    add_test(
+        NAME TC_CAP_004_CONTINUOUS_FRAME_CAPTURE
+        COMMAND continuous_frame_capture_tests
+    )
+
+    add_test(
+        NAME TC_CAP_004_CLI_INVALID_INDEX
+        COMMAND orvix_capture capture --index 999999
+    )
+
     set_tests_properties(
         TC_CAP_002_CLI_INVALID_INDEX
         TC_CAP_003_CLI_INVALID_INDEX
+        TC_CAP_004_CLI_INVALID_INDEX
         PROPERTIES
         WILL_FAIL TRUE
     )
