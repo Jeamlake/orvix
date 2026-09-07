@@ -1,5 +1,6 @@
 #include "orvix/capture/camera_selector.hpp"
 #include "orvix/capture/hresult_error.hpp"
+#include "orvix/capture/media_foundation_camera.hpp"
 #include "orvix/capture/media_foundation_device_enumerator.hpp"
 
 #include <charconv>
@@ -22,6 +23,7 @@ void print_usage() {
         << "Usage:\n"
         << "  orvix-capture devices\n"
         << "  orvix-capture select --index <N>\n"
+        << "  orvix-capture open --index <N>\n"
         << "  orvix-capture --help\n";
 }
 
@@ -109,6 +111,47 @@ int run_select(const std::string_view index_text) {
     }
 }
 
+int run_open(const std::string_view index_text) {
+    const std::size_t requested_index = parse_index(index_text);
+    const auto devices = enumerate_devices();
+
+    try {
+        const auto& selected =
+            orvix::capture::CameraSelector::select_by_index(
+                devices,
+                requested_index
+            );
+
+        orvix::capture::MediaFoundationCamera camera;
+        camera.open(selected);
+
+        if (!camera.is_open()) {
+            throw std::runtime_error(
+                "Media Foundation returned without an active media source."
+            );
+        }
+
+        std::cout
+            << "ORVIX Capture Core " << kVersion << "\n\n"
+            << "Opened video capture device:\n\n"
+            << "Index: " << selected.index << "\n"
+            << "Name: " << selected.friendly_name << "\n"
+            << "Backend: " << selected.backend << "\n\n"
+            << "Open status: OPEN\n"
+            << "Media source: ACTIVE\n";
+
+        return 0;
+    }
+    catch (const std::out_of_range& error) {
+        std::cerr
+            << "[ORV-CAP-404] Camera selection failed: "
+            << error.what()
+            << "\n";
+
+        return 66;
+    }
+}
+
 }  // namespace
 
 int main(const int argc, char* argv[]) {
@@ -128,10 +171,17 @@ int main(const int argc, char* argv[]) {
 
         if (
             argc == 4 &&
-            std::string_view(argv[1]) == "select" &&
+            (
+                std::string_view(argv[1]) == "select" ||
+                std::string_view(argv[1]) == "open"
+            ) &&
             std::string_view(argv[2]) == "--index"
         ) {
-            return run_select(argv[3]);
+            if (std::string_view(argv[1]) == "select") {
+                return run_select(argv[3]);
+            }
+
+            return run_open(argv[3]);
         }
 
         std::cerr << "[ORV-CAP-400] Invalid command or arguments.\n\n";
