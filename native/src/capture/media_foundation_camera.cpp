@@ -1,22 +1,34 @@
 #include "orvix/capture/media_foundation_camera.hpp"
 
+#include "orvix/capture/continuous_frame_capture.hpp"
 #include "orvix/capture/hresult_error.hpp"
 #include "orvix/capture/media_foundation_runtime.hpp"
+#include "orvix/capture/video_format_selector.hpp"
 
 #include <Windows.h>
 #include <mfapi.h>
+#include <mferror.h>
 #include <mfidl.h>
+#include <mfreadwrite.h>
 #include <wrl/client.h>
 
+#include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace orvix::capture {
 
 namespace {
 
 using Microsoft::WRL::ComPtr;
+
+constexpr DWORD kAllStreams =
+    static_cast<DWORD>(MF_SOURCE_READER_ALL_STREAMS);
+constexpr DWORD kFirstVideoStream =
+    static_cast<DWORD>(MF_SOURCE_READER_FIRST_VIDEO_STREAM);
 
 std::wstring utf8_to_wide(const std::string& value) {
     if (value.empty()) {
@@ -64,12 +76,192 @@ std::wstring utf8_to_wide(const std::string& value) {
     return result;
 }
 
+bool guid_equals(const GUID& left, const GUID& right) noexcept {
+    return IsEqualGUID(left, right) != FALSE;
+}
+
+std::string pixel_format_name(const GUID& subtype) {
+    if (guid_equals(subtype, MFVideoFormat_NV12)) {
+        return "NV12";
+    }
+
+    if (guid_equals(subtype, MFVideoFormat_YUY2)) {
+        return "YUY2";
+    }
+
+    if (guid_equals(subtype, MFVideoFormat_UYVY)) {
+        return "UYVY";
+    }
+
+    if (guid_equals(subtype, MFVideoFormat_I420)) {
+        return "I420";
+    }
+
+    if (guid_equals(subtype, MFVideoFormat_IYUV)) {
+        return "IYUV";
+    }
+
+    if (guid_equals(subtype, MFVideoFormat_YV12)) {
+        return "YV12";
+    }
+
+    if (guid_equals(subtype, MFVideoFormat_RGB24)) {
+        return "RGB24";
+    }
+
+    if (guid_equals(subtype, MFVideoFormat_RGB32)) {
+        return "RGB32";
+    }
+
+    if (guid_equals(subtype, MFVideoFormat_ARGB32)) {
+        return "ARGB32";
+    }
+
+    if (guid_equals(subtype, MFVideoFormat_MJPG)) {
+        return "MJPG";
+    }
+
+    if (guid_equals(subtype, MFVideoFormat_H264)) {
+        return "H264";
+    }
+
+    return "UNKNOWN";
+}
+
+bool is_compressed_format(const GUID& subtype) noexcept {
+    return
+        guid_equals(subtype, MFVideoFormat_MJPG) ||
+        guid_equals(subtype, MFVideoFormat_H264);
+}
+
+bool try_read_video_format(
+    IMFMediaType* media_type,
+    const std::size_t native_type_index,
+    VideoFormat& format
+) {
+    GUID major_type{};
+    if (
+        FAILED(media_type->GetGUID(MF_MT_MAJOR_TYPE, &major_type)) ||
+        !guid_equals(major_type, MFMediaType_Video)
+    ) {
+        return false;
+    }
+
+    UINT32 width = 0;
+    UINT32 height = 0;
+    if (FAILED(MFGetAttributeSize(
+        media_type,
+        MF_MT_FRAME_SIZE,
+        &width,
+        &height
+    ))) {
+        return false;
+    }
+
+    UINT32 frame_rate_numerator = 0;
+    UINT32 frame_rate_denominator = 0;
+    if (
+        FAILED(MFGetAttributeRatio(
+            media_type,
+            MF_MT_FRAME_RATE,
+            &frame_rate_numerator,
+            &frame_rate_denominator
+        )) ||
+        frame_rate_denominator == 0
+    ) {
+        return false;
+    }
+
+    GUID subtype{};
+    if (FAILED(media_type->GetGUID(MF_MT_SUBTYPE, &subtype))) {
+        return false;
+    }
+
+    format.native_type_index = native_type_index;
+    format.width = width;
+    format.height = height;
+    format.frame_rate_numerator = frame_rate_numerator;
+    format.frame_rate_denominator = frame_rate_denominator;
+    format.pixel_format = pixel_format_name(subtype);
+    format.compressed = is_compressed_format(subtype);
+
+    return true;
+}
+
+class MediaFoundationFrameReader final : public FrameReader {
+public:
+    explicit MediaFoundationFrameReader(IMFSourceReader* source_reader)
+        : source_reader_(source_reader) {}
+
+    FrameReadResult read_next() override {
+        DWORD stream_flags = 0;
+        LONGLONG timestamp = 0;
+        ComPtr<IMFSample> sample;
+
+        const HRESULT result = source_reader_->ReadSample(
+            kFirstVideoStream,
+            0,
+            nullptr,
+            &stream_flags,
+            &timestamp,
+            &sample
+        );
+
+        if (FAILED(result)) {
+            throw HResultError(result, "IMFSourceReader::ReadSample");
+        }
+
+        if ((stream_flags & MF_SOURCE_READERF_ERROR) != 0) {
+            throw std::runtime_error(
+                "The Media Foundation source reader reported an error."
+            );
+        }
+
+        if ((stream_flags & MF_SOURCE_READERF_ENDOFSTREAM) != 0) {
+            throw std::runtime_error(
+                "The camera stream ended before capture completed."
+            );
+        }
+
+        if (
+            (stream_flags & MF_SOURCE_READERF_NATIVEMEDIATYPECHANGED) != 0 ||
+            (stream_flags & MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) != 0
+        ) {
+            throw std::runtime_error(
+                "The camera format changed during capture."
+            );
+        }
+
+        if (sample == nullptr) {
+            return {false, timestamp, 0};
+        }
+
+        DWORD byte_count = 0;
+        const HRESULT length_result = sample->GetTotalLength(&byte_count);
+
+        if (FAILED(length_result)) {
+            throw HResultError(length_result, "IMFSample::GetTotalLength");
+        }
+
+        return {
+            true,
+            static_cast<std::int64_t>(timestamp),
+            static_cast<std::size_t>(byte_count)
+        };
+    }
+
+private:
+    IMFSourceReader* source_reader_;
+};
+
 }  // namespace
 
 struct MediaFoundationCamera::Impl final {
     ComRuntime com_runtime;
     MediaFoundationRuntime media_foundation_runtime;
     ComPtr<IMFMediaSource> media_source;
+    ComPtr<IMFSourceReader> source_reader;
+    bool format_configured{false};
 };
 
 MediaFoundationCamera::MediaFoundationCamera()
@@ -137,14 +329,175 @@ void MediaFoundationCamera::open(const CameraDevice& device) {
         throw HResultError(result, "IMFMediaSource::GetCharacteristics");
     }
 
+    ComPtr<IMFSourceReader> source_reader;
+    result = MFCreateSourceReaderFromMediaSource(
+        media_source.Get(),
+        nullptr,
+        &source_reader
+    );
+
+    if (FAILED(result)) {
+        static_cast<void>(media_source->Shutdown());
+        throw HResultError(result, "MFCreateSourceReaderFromMediaSource");
+    }
+
+    result = source_reader->SetStreamSelection(
+        kAllStreams,
+        FALSE
+    );
+
+    if (FAILED(result)) {
+        source_reader.Reset();
+        static_cast<void>(media_source->Shutdown());
+        throw HResultError(result, "IMFSourceReader::SetStreamSelection(all)");
+    }
+
+    result = source_reader->SetStreamSelection(
+        kFirstVideoStream,
+        TRUE
+    );
+
+    if (FAILED(result)) {
+        source_reader.Reset();
+        static_cast<void>(media_source->Shutdown());
+        throw HResultError(result, "IMFSourceReader::SetStreamSelection(video)");
+    }
+
     impl_->media_source = std::move(media_source);
+    impl_->source_reader = std::move(source_reader);
+    impl_->format_configured = false;
 }
 
 void MediaFoundationCamera::close() noexcept {
-    if (impl_ != nullptr && impl_->media_source != nullptr) {
+    if (impl_ == nullptr) {
+        return;
+    }
+
+    impl_->source_reader.Reset();
+    impl_->format_configured = false;
+
+    if (impl_->media_source != nullptr) {
         static_cast<void>(impl_->media_source->Shutdown());
         impl_->media_source.Reset();
     }
+}
+
+std::vector<VideoFormat> MediaFoundationCamera::available_formats() const {
+    if (!is_open() || impl_->source_reader == nullptr) {
+        throw std::logic_error(
+            "A camera must be open before enumerating video formats."
+        );
+    }
+
+    std::vector<VideoFormat> formats;
+
+    for (DWORD index = 0;; ++index) {
+        ComPtr<IMFMediaType> media_type;
+        const HRESULT result = impl_->source_reader->GetNativeMediaType(
+            kFirstVideoStream,
+            index,
+            &media_type
+        );
+
+        if (result == MF_E_NO_MORE_TYPES) {
+            break;
+        }
+
+        if (FAILED(result)) {
+            throw HResultError(
+                result,
+                "IMFSourceReader::GetNativeMediaType"
+            );
+        }
+
+        VideoFormat format;
+        if (try_read_video_format(media_type.Get(), index, format)) {
+            formats.push_back(std::move(format));
+        }
+    }
+
+    return formats;
+}
+
+VideoFormat MediaFoundationCamera::configure(const VideoFormatTarget& target) {
+    if (!is_open() || impl_->source_reader == nullptr) {
+        throw std::logic_error(
+            "A camera must be open before configuring a video format."
+        );
+    }
+
+    impl_->format_configured = false;
+
+    const std::vector<VideoFormat> formats = available_formats();
+    const VideoFormat& selected =
+        VideoFormatSelector::select_best(formats, target);
+
+    ComPtr<IMFMediaType> media_type;
+    HRESULT result = impl_->source_reader->GetNativeMediaType(
+        kFirstVideoStream,
+        static_cast<DWORD>(selected.native_type_index),
+        &media_type
+    );
+
+    if (FAILED(result)) {
+        throw HResultError(
+            result,
+            "IMFSourceReader::GetNativeMediaType(selected)"
+        );
+    }
+
+    result = impl_->source_reader->SetCurrentMediaType(
+        kFirstVideoStream,
+        nullptr,
+        media_type.Get()
+    );
+
+    if (FAILED(result)) {
+        throw HResultError(result, "IMFSourceReader::SetCurrentMediaType");
+    }
+
+    ComPtr<IMFMediaType> configured_type;
+    result = impl_->source_reader->GetCurrentMediaType(
+        kFirstVideoStream,
+        &configured_type
+    );
+
+    if (FAILED(result)) {
+        throw HResultError(result, "IMFSourceReader::GetCurrentMediaType");
+    }
+
+    VideoFormat configured;
+    if (!try_read_video_format(
+        configured_type.Get(),
+        selected.native_type_index,
+        configured
+    )) {
+        throw std::runtime_error(
+            "Media Foundation returned an incomplete configured video format."
+        );
+    }
+
+    impl_->format_configured = true;
+    return configured;
+}
+
+CaptureSummary MediaFoundationCamera::capture_frames(
+    const std::size_t requested_frames
+) {
+    if (!is_open() || impl_->source_reader == nullptr) {
+        throw std::logic_error(
+            "A camera must be open before capturing frames."
+        );
+    }
+
+    if (!impl_->format_configured) {
+        throw std::logic_error(
+            "A video format must be configured before capturing frames."
+        );
+    }
+
+    MediaFoundationFrameReader reader(impl_->source_reader.Get());
+    return ContinuousFrameCapture::run(reader, requested_frames);
 }
 
 bool MediaFoundationCamera::is_open() const noexcept {

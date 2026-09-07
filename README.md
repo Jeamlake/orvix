@@ -81,6 +81,20 @@ Dashboard, configuration, recovery, automated testing, benchmarks, reproducibili
 
 Windows 10/11 x64.
 
+## Native capture CLI
+
+```text
+orvix-capture devices
+orvix-capture select --index <N>
+orvix-capture open --index <N>
+orvix-capture formats --index <N>
+orvix-capture capture --index <N>
+```
+
+The `capture` command opens the selected camera, negotiates the closest native
+format to the initial 1280x720 at 30 FPS target and reads 120 consecutive video
+samples.
+
 ## Privacy
 
 Frames are ephemeral by default and are not persisted automatically.
