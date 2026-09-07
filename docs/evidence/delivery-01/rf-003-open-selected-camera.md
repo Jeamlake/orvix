@@ -81,6 +81,19 @@ Media source: ACTIVE
 - hardware-independent tests: **PASS**
 - traceability updated: **PASS**
 
+## GitHub Actions validation
+
+The RF-003 implementation was validated by the repository CI workflow.
+
+- status: completed
+- conclusion: success
+- commit: 5555af65763259d8ef6d0008079117b4b45722a8
+- run: https://github.com/Jeamlake/orvix/actions/runs/34081939276
+
+The native job performs a clean MSVC build and executes all hardware-independent
+CTest tests. Physical camera opening is validated separately on the development
+workstation.
+
 ## Scope boundary
 
 RF-003 proves that the selected physical device can be opened. Media-type
