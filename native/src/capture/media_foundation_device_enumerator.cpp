@@ -1,6 +1,7 @@
 #include "orvix/capture/media_foundation_device_enumerator.hpp"
 
 #include "orvix/capture/hresult_error.hpp"
+#include "orvix/capture/media_foundation_runtime.hpp"
 
 #include <Windows.h>
 #include <mfapi.h>
@@ -18,60 +19,6 @@ namespace orvix::capture {
 namespace {
 
 using Microsoft::WRL::ComPtr;
-
-class ComRuntime final {
-public:
-    ComRuntime() {
-        const HRESULT result = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-
-        if (FAILED(result)) {
-            throw HResultError(result, "CoInitializeEx");
-        }
-
-        initialized_ = true;
-    }
-
-    ~ComRuntime() {
-        if (initialized_) {
-            CoUninitialize();
-        }
-    }
-
-    ComRuntime(const ComRuntime&) = delete;
-    ComRuntime& operator=(const ComRuntime&) = delete;
-    ComRuntime(ComRuntime&&) = delete;
-    ComRuntime& operator=(ComRuntime&&) = delete;
-
-private:
-    bool initialized_{false};
-};
-
-class MediaFoundationRuntime final {
-public:
-    MediaFoundationRuntime() {
-        const HRESULT result = MFStartup(MF_VERSION);
-
-        if (FAILED(result)) {
-            throw HResultError(result, "MFStartup");
-        }
-
-        initialized_ = true;
-    }
-
-    ~MediaFoundationRuntime() {
-        if (initialized_) {
-            MFShutdown();
-        }
-    }
-
-    MediaFoundationRuntime(const MediaFoundationRuntime&) = delete;
-    MediaFoundationRuntime& operator=(const MediaFoundationRuntime&) = delete;
-    MediaFoundationRuntime(MediaFoundationRuntime&&) = delete;
-    MediaFoundationRuntime& operator=(MediaFoundationRuntime&&) = delete;
-
-private:
-    bool initialized_{false};
-};
 
 class CoTaskMemString final {
 public:
