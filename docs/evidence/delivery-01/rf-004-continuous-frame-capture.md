@@ -94,6 +94,18 @@ The capture path rejects:
 - hardware-independent tests: **PASS**
 - traceability updated: **PASS**
 
+## GitHub Actions validation
+
+- status: completed
+- conclusion: success
+- commit: e4455f3b07ea7bebfce305a82eb0eb77b8123d3b
+- run: https://github.com/Jeamlake/orvix/actions/runs/34082967234
+
+The native CI job performs a clean MSVC build and executes the complete CTest
+suite. The synthetic reader validates the continuous capture loop without
+camera hardware; physical sample acquisition is validated separately on the
+development workstation.
+
 ## Scope boundary
 
 RF-004 counts and validates native video samples without persisting frame data.

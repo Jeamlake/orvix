@@ -73,6 +73,17 @@ Format status: CONFIGURED
 - configured media type read back from Media Foundation: **PASS**
 - hardware-independent selection tests: **PASS**
 
+## GitHub Actions validation
+
+- status: completed
+- conclusion: success
+- commit: e4455f3b07ea7bebfce305a82eb0eb77b8123d3b
+- run: https://github.com/Jeamlake/orvix/actions/runs/34082967234
+
+The native CI job performs a clean MSVC build and executes the complete CTest
+suite. Hardware-independent format-selection behavior is covered in CI, while
+physical media-type negotiation is validated on the development workstation.
+
 ## Scope boundary
 
 The negotiated frame rate is the camera media-type setting. Measuring effective
