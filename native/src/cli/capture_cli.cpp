@@ -2,9 +2,7 @@
 
 #include "orvix/capture/camera_selector.hpp"
 #include "orvix/capture/diagnostic_error.hpp"
-#include "orvix/capture/hresult_error.hpp"
-#include "orvix/capture/media_foundation_camera.hpp"
-#include "orvix/capture/media_foundation_device_enumerator.hpp"
+#include "orvix/capture/platform_factory.hpp"
 #include "orvix/observability/logger.hpp"
 
 #include <charconv>
@@ -26,10 +24,9 @@ namespace orvix::cli {
 namespace {
 
 using capture::CameraDevice;
+using capture::Camera;
 using capture::CaptureSummary;
 using capture::DiagnosticError;
-using capture::HResultError;
-using capture::MediaFoundationCamera;
 using capture::VideoFormat;
 using observability::Logger;
 
@@ -64,8 +61,23 @@ std::size_t parse_index(const std::string_view value) {
 }
 
 std::vector<CameraDevice> enumerate_devices() {
-    const capture::MediaFoundationDeviceEnumerator enumerator;
-    return enumerator.enumerate();
+    try {
+        const auto enumerator =
+            capture::create_platform_device_enumerator();
+        return enumerator->enumerate();
+    }
+    catch (const DiagnosticError&) {
+        throw;
+    }
+    catch (const std::runtime_error& error) {
+        throw DiagnosticError(
+            "ORV-CAP-500",
+            "camera_enumeration_failed",
+            "Unable to enumerate video devices: " +
+                std::string(error.what()),
+            70
+        );
+    }
 }
 
 const CameraDevice& select_device(
@@ -87,18 +99,18 @@ const CameraDevice& select_device(
     );
 }
 
-std::unique_ptr<MediaFoundationCamera> open_camera(
+std::unique_ptr<Camera> open_camera(
     const CameraDevice& selected
 ) {
     try {
-        auto camera = std::make_unique<MediaFoundationCamera>();
+        auto camera = capture::create_platform_camera();
         camera->open(selected);
 
         if (!camera->is_open()) {
             throw DiagnosticError(
                 "ORV-CAP-501",
                 "camera_open_failed",
-                "Media Foundation returned without an active media source.",
+                "The native backend returned without an active camera.",
                 71
             );
         }
@@ -108,7 +120,7 @@ std::unique_ptr<MediaFoundationCamera> open_camera(
     catch (const DiagnosticError&) {
         throw;
     }
-    catch (const HResultError& error) {
+    catch (const std::runtime_error& error) {
         throw DiagnosticError(
             "ORV-CAP-501",
             "camera_open_failed",
@@ -119,14 +131,14 @@ std::unique_ptr<MediaFoundationCamera> open_camera(
     }
 }
 
-VideoFormat configure_camera(MediaFoundationCamera& camera) {
+VideoFormat configure_camera(Camera& camera) {
     try {
         return camera.configure(capture::VideoFormatTarget{});
     }
     catch (const DiagnosticError&) {
         throw;
     }
-    catch (const HResultError& error) {
+    catch (const std::runtime_error& error) {
         throw DiagnosticError(
             "ORV-CAP-502",
             "format_negotiation_failed",
@@ -135,30 +147,14 @@ VideoFormat configure_camera(MediaFoundationCamera& camera) {
             72
         );
     }
-    catch (const std::runtime_error& error) {
-        throw DiagnosticError(
-            "ORV-CAP-502",
-            "format_negotiation_failed",
-            error.what(),
-            72
-        );
-    }
 }
 
-CaptureSummary capture_frames(MediaFoundationCamera& camera) {
+CaptureSummary capture_frames(Camera& camera) {
     try {
         return camera.capture_frames(kDefaultCaptureFrames);
     }
     catch (const DiagnosticError&) {
         throw;
-    }
-    catch (const HResultError& error) {
-        throw DiagnosticError(
-            "ORV-CAP-504",
-            "frame_read_failed",
-            "Unable to read a video frame: " + std::string(error.what()),
-            75
-        );
     }
     catch (const std::runtime_error& error) {
         throw DiagnosticError(
@@ -209,7 +205,7 @@ void print_video_format(
 int run_devices(Logger& logger) {
     std::cout
         << "ORVIX Capture Core " << kVersion << "\n\n"
-        << "Backend: Windows Media Foundation\n\n";
+        << "Backend: " << capture::platform_backend_name() << "\n\n";
 
     const auto devices = enumerate_devices();
 
@@ -579,15 +575,6 @@ int CaptureCli::run(const int argc, char* argv[]) const {
             "invalid_argument",
             "Invalid argument: " + std::string(error.what()),
             64
-        );
-    }
-    catch (const HResultError& error) {
-        return report_error(
-            *logger,
-            "ORV-CAP-500",
-            "native_api_failure",
-            "Native capture API failure: " + std::string(error.what()),
-            70
         );
     }
     catch (const std::exception& error) {
