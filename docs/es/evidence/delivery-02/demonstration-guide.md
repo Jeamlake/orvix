@@ -17,6 +17,19 @@ En PowerShell se pueden usar `scripts\setup.ps1`, `scripts\build.ps1` y
 
 ## Demostración con webcam
 
+### Inicio rápido en Git Bash
+
+La demostración completa puede iniciarse en una sola terminal:
+
+```bash
+./scripts/demo-camera.sh
+```
+
+El script abre el productor C++, espera la conexión desde Python y muestra la
+ventana RAW. Al cerrar la ventana con `Q` o `Esc`, también libera la webcam.
+
+### Ejecución manual en dos terminales
+
 Abrir dos terminales en la raíz del repositorio. En la primera terminal:
 
 ```bash
