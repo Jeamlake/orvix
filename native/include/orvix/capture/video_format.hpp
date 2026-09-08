@@ -14,6 +14,7 @@ struct VideoFormat final {
     std::uint32_t frame_rate_denominator{1};
     std::string pixel_format;
     bool compressed{false};
+    std::uint32_t stride{};
 
     [[nodiscard]]
     double frames_per_second() const noexcept {

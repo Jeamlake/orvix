@@ -35,7 +35,8 @@ CaptureSummary ContinuousFrameCapture::run(
     FrameReader& reader,
     const std::size_t requested_frames,
     const VideoFormat& format,
-    const std::size_t maximum_empty_reads
+    const std::size_t maximum_empty_reads,
+    FrameSink* const sink
 ) {
     if (requested_frames == 0) {
         throw std::invalid_argument(
@@ -65,8 +66,12 @@ CaptureSummary ContinuousFrameCapture::run(
             continue;
         }
 
+        const std::size_t byte_count = frame.payload.empty()
+            ? frame.byte_count
+            : frame.payload.size();
+
         if (
-            frame.byte_count >
+            byte_count >
             std::numeric_limits<std::size_t>::max() - summary.total_bytes
         ) {
             throw std::overflow_error("Captured byte counter overflowed.");
@@ -75,7 +80,7 @@ CaptureSummary ContinuousFrameCapture::run(
         ++summary.captured_frames;
         summary.last_sequence =
             static_cast<std::uint64_t>(summary.captured_frames);
-        summary.total_bytes += frame.byte_count;
+        summary.total_bytes += byte_count;
 
         if (summary.captured_frames == 1) {
             summary.first_sequence = summary.last_sequence;
@@ -86,14 +91,25 @@ CaptureSummary ContinuousFrameCapture::run(
         }
 
         summary.last_timestamp_100ns = frame.timestamp_100ns;
-        summary.frames.push_back({
+        FrameMetadata metadata{
             summary.last_sequence,
             frame.timestamp_100ns,
             format.width,
             format.height,
+            frame.stride == 0 ? format.stride : frame.stride,
             format.pixel_format,
-            frame.byte_count
-        });
+            byte_count
+        };
+        summary.frames.push_back(metadata);
+
+        if (sink != nullptr) {
+            if (frame.payload.empty() && byte_count != 0) {
+                throw std::runtime_error(
+                    "A frame sink requires the captured payload bytes."
+                );
+            }
+            sink->publish(metadata, frame.payload);
+        }
     }
 
     return summary;

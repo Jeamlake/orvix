@@ -24,7 +24,8 @@ public:
 
     [[nodiscard]]
     virtual CaptureSummary capture_frames(
-        std::size_t requested_frames
+        std::size_t requested_frames,
+        FrameSink* sink = nullptr
     ) = 0;
 
     [[nodiscard]]

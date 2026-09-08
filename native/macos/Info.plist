@@ -7,7 +7,7 @@
     <key>CFBundleName</key>
     <string>ORVIX Capture</string>
     <key>CFBundleVersion</key>
-    <string>0.1.0</string>
+    <string>0.2.0</string>
     <key>NSCameraUsageDescription</key>
     <string>ORVIX uses the selected camera to capture ephemeral video frames.</string>
 </dict>
