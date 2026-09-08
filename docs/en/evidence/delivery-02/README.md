@@ -48,6 +48,17 @@ Local automated validation produced:
 - Python unit tests: **6/6 PASS**.
 - Synthetic C++ → shared memory → Python integration: **PASS**.
 
+## GitHub Actions validation
+
+- status: completed
+- conclusion: success
+- run: https://github.com/Jeamlake/orvix/actions/runs/34273071421
+- C++ and synthetic bridge on Windows: **PASS**
+- C++ and synthetic bridge on Linux: **PASS**
+- C++ and synthetic bridge on macOS: **PASS**
+- Python 3.11 on Windows, Linux and macOS: **PASS**
+- Python 3.8 compatibility: **PASS**
+
 ## Reproduction
 
 The [demonstration guide](demonstration-guide.md) provides Git Bash,

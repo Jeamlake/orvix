@@ -48,6 +48,17 @@ La validación automática local obtuvo:
 - pytest unitario: **6/6 PASS**.
 - integración sintética C++ → memoria compartida → Python: **PASS**.
 
+## Validación con GitHub Actions
+
+- estado: completed
+- conclusión: success
+- ejecución: https://github.com/Jeamlake/orvix/actions/runs/34273071421
+- C++ y puente sintético en Windows: **PASS**
+- C++ y puente sintético en Linux: **PASS**
+- C++ y puente sintético en macOS: **PASS**
+- Python 3.11 en Windows, Linux y macOS: **PASS**
+- Compatibilidad con Python 3.8: **PASS**
+
 ## Reproducción
 
 La [guía de demostración](demonstration-guide.md) contiene los comandos para
