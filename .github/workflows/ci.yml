@@ -42,6 +42,14 @@ jobs:
         run: cmake --build build --config Release --parallel
       - name: Test
         run: ctest --test-dir build -C Release --output-on-failure
+      - name: Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install bridge validation dependencies
+        run: python -m pip install -e ".[dev,vision]"
+      - name: Test native-to-Python bridge
+        run: python -m pytest -m integration python/tests/integration/test_bridge_process.py
 
   python:
     name: Python 3.11 (${{ matrix.os }})
@@ -63,7 +71,7 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[dev]"
+          python -m pip install -e ".[dev,vision]"
       - name: Test
         run: python -m pytest
 
@@ -80,6 +88,6 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[dev]"
+          python -m pip install -e ".[dev,vision]"
       - name: Test
         run: python -m pytest
