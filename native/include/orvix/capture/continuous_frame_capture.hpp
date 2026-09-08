@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -13,6 +14,8 @@ struct FrameReadResult final {
     bool frame_available{false};
     std::int64_t timestamp_100ns{};
     std::size_t byte_count{};
+    std::uint32_t stride{};
+    std::vector<std::byte> payload;
 };
 
 class FrameReader {
@@ -28,8 +31,19 @@ struct FrameMetadata final {
     std::int64_t timestamp_100ns{};
     std::uint32_t width{};
     std::uint32_t height{};
+    std::uint32_t stride{};
     std::string pixel_format;
     std::size_t byte_count{};
+};
+
+class FrameSink {
+public:
+    virtual ~FrameSink() = default;
+
+    virtual void publish(
+        const FrameMetadata& metadata,
+        std::span<const std::byte> payload
+    ) = 0;
 };
 
 struct CaptureSummary final {
@@ -58,7 +72,8 @@ public:
         FrameReader& reader,
         std::size_t requested_frames,
         const VideoFormat& format,
-        std::size_t maximum_empty_reads = 1000
+        std::size_t maximum_empty_reads = 1000,
+        FrameSink* sink = nullptr
     );
 };
 

@@ -29,7 +29,8 @@ public:
 
     [[nodiscard]]
     CaptureSummary capture_frames(
-        std::size_t requested_frames
+        std::size_t requested_frames,
+        FrameSink* sink = nullptr
     ) override;
 
     [[nodiscard]]

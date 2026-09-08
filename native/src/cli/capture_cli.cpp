@@ -3,6 +3,9 @@
 #include "orvix/capture/camera_selector.hpp"
 #include "orvix/capture/diagnostic_error.hpp"
 #include "orvix/capture/platform_factory.hpp"
+#include "orvix/capture/synthetic_frame_reader.hpp"
+#include "orvix/ipc/shared_memory_protocol.hpp"
+#include "orvix/ipc/shared_memory_publisher.hpp"
 #include "orvix/observability/logger.hpp"
 
 #include <charconv>
@@ -30,8 +33,23 @@ using capture::DiagnosticError;
 using capture::VideoFormat;
 using observability::Logger;
 
-constexpr std::string_view kVersion = "0.1.0";
+constexpr std::string_view kVersion = "0.2.0";
 constexpr std::size_t kDefaultCaptureFrames = 120;
+constexpr std::size_t kDefaultBridgeFrames = 900;
+
+struct BridgeOptions final {
+    bool synthetic{false};
+    bool has_index{false};
+    std::size_t index{};
+    std::size_t frames{kDefaultBridgeFrames};
+    std::string name{ipc::kDefaultSharedMemoryName};
+};
+
+void log_camera_opened(Logger& logger, const CameraDevice& selected);
+void print_video_format(
+    const VideoFormat& format,
+    std::string_view prefix
+);
 
 void print_usage() {
     std::cout
@@ -42,6 +60,8 @@ void print_usage() {
         << "  orvix-capture open --index <N>\n"
         << "  orvix-capture formats --index <N>\n"
         << "  orvix-capture capture --index <N>\n"
+        << "  orvix-capture bridge --index <N> [--frames <N>] [--name <NAME>]\n"
+        << "  orvix-capture bridge --synthetic [--frames <N>] [--name <NAME>]\n"
         << "  orvix-capture --help\n";
 }
 
@@ -58,6 +78,71 @@ std::size_t parse_index(const std::string_view value) {
     }
 
     return index;
+}
+
+std::size_t parse_positive_size(
+    const std::string_view value,
+    const std::string_view label
+) {
+    const std::size_t parsed = parse_index(value);
+    if (parsed == 0) {
+        throw std::invalid_argument(
+            std::string(label) + " must be greater than zero."
+        );
+    }
+    return parsed;
+}
+
+BridgeOptions parse_bridge_options(const int argc, char* argv[]) {
+    BridgeOptions options;
+
+    for (int position = 2; position < argc; ++position) {
+        const std::string_view argument = argv[position];
+        if (argument == "--synthetic") {
+            if (options.synthetic) {
+                throw std::invalid_argument("--synthetic was specified twice.");
+            }
+            options.synthetic = true;
+            continue;
+        }
+
+        if (
+            argument != "--index" &&
+            argument != "--frames" &&
+            argument != "--name"
+        ) {
+            throw std::invalid_argument(
+                "Unknown bridge argument: " + std::string(argument)
+            );
+        }
+        if (position + 1 >= argc) {
+            throw std::invalid_argument(
+                "Missing value after " + std::string(argument) + "."
+            );
+        }
+
+        const std::string_view value = argv[++position];
+        if (argument == "--index") {
+            if (options.has_index) {
+                throw std::invalid_argument("--index was specified twice.");
+            }
+            options.index = parse_index(value);
+            options.has_index = true;
+        }
+        else if (argument == "--frames") {
+            options.frames = parse_positive_size(value, "Frame count");
+        }
+        else {
+            options.name = value;
+        }
+    }
+
+    if (options.synthetic == options.has_index) {
+        throw std::invalid_argument(
+            "Bridge requires exactly one source: --index <N> or --synthetic."
+        );
+    }
+    return options;
 }
 
 std::vector<CameraDevice> enumerate_devices() {
@@ -164,6 +249,156 @@ CaptureSummary capture_frames(Camera& camera) {
             75
         );
     }
+}
+
+void print_bridge_started(
+    const BridgeOptions& options,
+    const VideoFormat& format,
+    const std::string_view source
+) {
+    std::cout
+        << "ORVIX Capture Core " << kVersion << "\n\n"
+        << "Shared-memory video bridge\n\n"
+        << "Source: " << source << "\n"
+        << "Shared memory: " << options.name << "\n"
+        << "Ring slots: " << ipc::kDefaultSlotCount << "\n"
+        << "Frames requested: " << options.frames << "\n";
+    print_video_format(format, "Published");
+    std::cout
+        << "\nBridge status: RUNNING\n"
+        << "Open another terminal and run:\n"
+        << "  python -m orvix.ui.viewer --name "
+        << options.name << "\n\n";
+}
+
+void print_bridge_completed(
+    const CaptureSummary& summary,
+    const ipc::PublisherStats& statistics
+) {
+    std::cout
+        << "\nFrames published: " << statistics.published_sequence << "\n"
+        << "Last sequence consumed: " << statistics.consumed_sequence << "\n"
+        << "Frames overwritten before consumption: "
+        << statistics.overwritten_frames << "\n"
+        << "Final buffer utilization: "
+        << std::fixed << std::setprecision(1)
+        << statistics.buffer_utilization * 100.0 << "%\n"
+        << "Measured producer FPS: "
+        << std::fixed << std::setprecision(2)
+        << statistics.producer_fps << "\n"
+        << "Capture FPS: " << summary.capture_fps() << "\n"
+        << "Bridge status: COMPLETED\n";
+}
+
+CaptureSummary publish_reader(
+    capture::FrameReader& reader,
+    const BridgeOptions& options,
+    const VideoFormat& format,
+    Logger& logger,
+    const std::string_view source
+) {
+    ipc::SharedMemoryPublisher publisher(options.name, format);
+    print_bridge_started(options, format, source);
+    logger.info(
+        "ORV-IPC-200",
+        "shared_memory_bridge_started",
+        "name=" + options.name +
+            " source=" + std::string(source) +
+            " requested_frames=" + std::to_string(options.frames)
+    );
+
+    try {
+        CaptureSummary summary = capture::ContinuousFrameCapture::run(
+            reader,
+            options.frames,
+            format,
+            1000,
+            &publisher
+        );
+        publisher.mark_completed();
+        const auto statistics = publisher.stats();
+        print_bridge_completed(summary, statistics);
+        logger.info(
+            "ORV-IPC-201",
+            "shared_memory_bridge_completed",
+            "published_sequence=" +
+                std::to_string(statistics.published_sequence) +
+                " consumed_sequence=" +
+                std::to_string(statistics.consumed_sequence) +
+                " overwritten_frames=" +
+                std::to_string(statistics.overwritten_frames)
+        );
+        return summary;
+    }
+    catch (...) {
+        publisher.mark_failed();
+        logger.error(
+            "ORV-IPC-500",
+            "shared_memory_bridge_failed",
+            "The producer stopped after a bridge failure."
+        );
+        throw;
+    }
+}
+
+int run_bridge(Logger& logger, const BridgeOptions& options) {
+    if (options.synthetic) {
+        capture::SyntheticFrameReader reader;
+        static_cast<void>(publish_reader(
+            reader,
+            options,
+            reader.format(),
+            logger,
+            "synthetic NV12"
+        ));
+        return 0;
+    }
+
+    const auto devices = enumerate_devices();
+    const auto& selected = select_device(devices, options.index);
+    auto camera = open_camera(selected);
+    log_camera_opened(logger, selected);
+    const auto configured = configure_camera(*camera);
+    ipc::SharedMemoryPublisher publisher(options.name, configured);
+    print_bridge_started(
+        options,
+        configured,
+        selected.friendly_name
+    );
+    logger.info(
+        "ORV-IPC-200",
+        "shared_memory_bridge_started",
+        "name=" + options.name +
+            " source=" + selected.friendly_name +
+            " requested_frames=" + std::to_string(options.frames)
+    );
+
+    try {
+        const CaptureSummary summary = camera->capture_frames(
+            options.frames,
+            &publisher
+        );
+        publisher.mark_completed();
+        const auto statistics = publisher.stats();
+        print_bridge_completed(summary, statistics);
+        logger.info(
+            "ORV-IPC-201",
+            "shared_memory_bridge_completed",
+            "published_sequence=" +
+                std::to_string(statistics.published_sequence) +
+                " consumed_sequence=" +
+                std::to_string(statistics.consumed_sequence) +
+                " overwritten_frames=" +
+                std::to_string(statistics.overwritten_frames)
+        );
+    }
+    catch (...) {
+        publisher.mark_failed();
+        throw;
+    }
+
+    camera->close();
+    return 0;
 }
 
 std::string format_description(const VideoFormat& format) {
@@ -484,6 +719,10 @@ int report_error(
 }
 
 int dispatch(Logger& logger, const int argc, char* argv[]) {
+    if (argc >= 3 && std::string_view(argv[1]) == "bridge") {
+        return run_bridge(logger, parse_bridge_options(argc, argv));
+    }
+
     if (argc == 2) {
         const std::string command = argv[1];
 

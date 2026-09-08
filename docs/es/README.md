@@ -7,6 +7,8 @@
 - [Requisitos de software](requirements/software-requirements.md)
 - [Trazabilidad de requisitos](requirements/traceability.md)
 - [Evidencia de la Entrega 1](evidence/delivery-01/README.md)
+- [Evidencia de la Entrega 2](evidence/delivery-02/README.md)
+- [Guía de demostración de la Entrega 2](evidence/delivery-02/demonstration-guide.md)
 - [Validación multiplataforma](evidence/cross-platform-native-validation.md)
 - [Diagnósticos de captura](observability/capture-diagnostics.md)
 - [Protocolo IPC v1](protocol/ipc-v1.md)

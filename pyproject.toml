@@ -4,11 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "orvix"
-version = "0.1.0"
+version = "0.2.0"
 description = "Optical Real-time Video Ingestion eXchange"
 requires-python = ">=3.8,<3.14"
 license = {text = "MIT"}
 dependencies = []
+
+[project.scripts]
+orvix-viewer = "orvix.ui.viewer:main"
 
 [project.optional-dependencies]
 vision = [
@@ -28,4 +31,7 @@ where = ["python/src"]
 
 [tool.pytest.ini_options]
 testpaths = ["python/tests"]
-addopts = "-ra"
+addopts = "-ra -m 'not integration'"
+markers = [
+    "integration: exercises the native C++ producer and Python consumer together"
+]

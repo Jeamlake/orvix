@@ -15,6 +15,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -135,6 +136,29 @@ bool is_compressed_format(const GUID& subtype) noexcept {
         guid_equals(subtype, MFVideoFormat_H264);
 }
 
+std::uint32_t packed_stride(
+    const std::string& pixel_format,
+    const std::uint32_t width
+) noexcept {
+    if (
+        pixel_format == "YUY2" ||
+        pixel_format == "UYVY"
+    ) {
+        return width * 2U;
+    }
+    if (pixel_format == "RGB24") {
+        return width * 3U;
+    }
+    if (
+        pixel_format == "RGB32" ||
+        pixel_format == "ARGB32" ||
+        pixel_format == "BGRA32"
+    ) {
+        return width * 4U;
+    }
+    return width;
+}
+
 bool try_read_video_format(
     IMFMediaType* media_type,
     const std::size_t native_type_index,
@@ -185,14 +209,19 @@ bool try_read_video_format(
     format.frame_rate_denominator = frame_rate_denominator;
     format.pixel_format = pixel_format_name(subtype);
     format.compressed = is_compressed_format(subtype);
+    format.stride = packed_stride(format.pixel_format, width);
 
     return true;
 }
 
 class MediaFoundationFrameReader final : public FrameReader {
 public:
-    explicit MediaFoundationFrameReader(IMFSourceReader* source_reader)
-        : source_reader_(source_reader) {}
+    MediaFoundationFrameReader(
+        IMFSourceReader* source_reader,
+        const std::uint32_t stride
+    )
+        : source_reader_(source_reader),
+          stride_(stride) {}
 
     FrameReadResult read_next() override {
         DWORD stream_flags = 0;
@@ -265,15 +294,60 @@ public:
             throw HResultError(length_result, "IMFSample::GetTotalLength");
         }
 
+        ComPtr<IMFMediaBuffer> contiguous_buffer;
+        const HRESULT buffer_result = sample->ConvertToContiguousBuffer(
+            &contiguous_buffer
+        );
+        if (FAILED(buffer_result)) {
+            throw HResultError(
+                buffer_result,
+                "IMFSample::ConvertToContiguousBuffer"
+            );
+        }
+
+        std::vector<std::byte> payload(
+            static_cast<std::size_t>(byte_count)
+        );
+        BYTE* data = nullptr;
+        DWORD maximum_length = 0;
+        DWORD current_length = 0;
+        const HRESULT lock_result = contiguous_buffer->Lock(
+            &data,
+            &maximum_length,
+            &current_length
+        );
+        if (FAILED(lock_result)) {
+            throw HResultError(lock_result, "IMFMediaBuffer::Lock");
+        }
+
+        if (current_length != byte_count || current_length > maximum_length) {
+            static_cast<void>(contiguous_buffer->Unlock());
+            throw std::runtime_error(
+                "Media Foundation returned an inconsistent frame length."
+            );
+        }
+
+        if (byte_count != 0) {
+            std::memcpy(payload.data(), data, byte_count);
+        }
+
+        const HRESULT unlock_result = contiguous_buffer->Unlock();
+        if (FAILED(unlock_result)) {
+            throw HResultError(unlock_result, "IMFMediaBuffer::Unlock");
+        }
+
         return {
             true,
             static_cast<std::int64_t>(timestamp),
-            static_cast<std::size_t>(byte_count)
+            static_cast<std::size_t>(byte_count),
+            stride_,
+            std::move(payload)
         };
     }
 
 private:
     IMFSourceReader* source_reader_;
+    std::uint32_t stride_{};
 };
 
 }  // namespace
@@ -507,7 +581,8 @@ VideoFormat MediaFoundationCamera::configure(const VideoFormatTarget& target) {
 }
 
 CaptureSummary MediaFoundationCamera::capture_frames(
-    const std::size_t requested_frames
+    const std::size_t requested_frames,
+    FrameSink* const sink
 ) {
     if (!is_open() || impl_->source_reader == nullptr) {
         throw std::logic_error(
@@ -521,11 +596,16 @@ CaptureSummary MediaFoundationCamera::capture_frames(
         );
     }
 
-    MediaFoundationFrameReader reader(impl_->source_reader.Get());
+    MediaFoundationFrameReader reader(
+        impl_->source_reader.Get(),
+        impl_->configured_format.stride
+    );
     return ContinuousFrameCapture::run(
         reader,
         requested_frames,
-        impl_->configured_format
+        impl_->configured_format,
+        1000,
+        sink
     );
 }
 

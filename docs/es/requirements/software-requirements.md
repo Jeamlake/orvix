@@ -2,7 +2,7 @@
 
 [English](../../en/requirements/software-requirements.md) | [Español](software-requirements.md)
 
-Versión: 0.1
+Versión: 0.2
 
 ## Requisitos funcionales
 
@@ -84,3 +84,16 @@ Cámara
 | CA-008 | El checkout limpio se puede compilar usando la documentación. |
 | CA-009 | El CI independiente del hardware finaliza correctamente. |
 | CA-010 | El núcleo nativo compila y pasa sus pruebas en Windows, Linux y macOS. |
+
+## Criterios de aceptación de la Entrega 2
+
+| ID | Criterio |
+|---|---|
+| CA2-001 | C++ publica payload y metadatos de frames en un protocolo de memoria compartida versionado. |
+| CA2-002 | Python consume frames sin abrir la cámara. |
+| CA2-003 | NumPy interpreta los bytes según formato, dimensiones y stride. |
+| CA2-004 | OpenCV muestra el modo RAW y permite salir con `Q` o `Esc`. |
+| CA2-005 | El consumidor detecta saltos en la secuencia. |
+| CA2-006 | El sistema informa utilización del búfer y sobrescrituras. |
+| CA2-007 | Capture continúa si Vision termina antes que el productor. |
+| CA2-008 | Una fuente sintética valida el puente completo sin hardware en Windows, Linux y macOS. |

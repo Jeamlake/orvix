@@ -16,6 +16,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <cstring>
+#include <limits>
 #include <memory>
 #include <mutex>
 #include <numeric>
@@ -32,6 +34,161 @@ struct SampleQueue final {
     std::deque<orvix::capture::FrameReadResult> frames;
     bool callback_failed{false};
 };
+
+class PixelBufferLock final {
+public:
+    explicit PixelBufferLock(CVPixelBufferRef buffer)
+        : buffer_(buffer) {
+        const CVReturn result = CVPixelBufferLockBaseAddress(
+            buffer_,
+            kCVPixelBufferLock_ReadOnly
+        );
+        if (result != kCVReturnSuccess) {
+            throw std::runtime_error("Unable to lock an AVFoundation frame.");
+        }
+    }
+
+    ~PixelBufferLock() {
+        CVPixelBufferUnlockBaseAddress(
+            buffer_,
+            kCVPixelBufferLock_ReadOnly
+        );
+    }
+
+    PixelBufferLock(const PixelBufferLock&) = delete;
+    PixelBufferLock& operator=(const PixelBufferLock&) = delete;
+
+private:
+    CVPixelBufferRef buffer_;
+};
+
+std::size_t checked_product(
+    const std::size_t left,
+    const std::size_t right
+) {
+    if (
+        right != 0 &&
+        left > std::numeric_limits<std::size_t>::max() / right
+    ) {
+        throw std::overflow_error("AVFoundation frame size overflowed.");
+    }
+    return left * right;
+}
+
+orvix::capture::FrameReadResult frame_from_sample(
+    CMSampleBufferRef sample_buffer,
+    const std::int64_t timestamp_100ns
+) {
+    CVPixelBufferRef pixel_buffer =
+        CMSampleBufferGetImageBuffer(sample_buffer);
+    if (pixel_buffer == nullptr) {
+        throw std::runtime_error(
+            "AVFoundation did not provide a pixel buffer."
+        );
+    }
+
+    PixelBufferLock lock(pixel_buffer);
+    const std::size_t width = CVPixelBufferGetWidth(pixel_buffer);
+    const std::size_t height = CVPixelBufferGetHeight(pixel_buffer);
+    const FourCharCode format = CVPixelBufferGetPixelFormatType(pixel_buffer);
+    std::uint32_t stride = 0;
+    std::vector<std::byte> payload;
+
+    if (CVPixelBufferIsPlanar(pixel_buffer)) {
+        const std::size_t plane_count =
+            CVPixelBufferGetPlaneCount(pixel_buffer);
+        if (plane_count == 0) {
+            throw std::runtime_error(
+                "AVFoundation returned an empty planar pixel buffer."
+            );
+        }
+
+        stride = static_cast<std::uint32_t>(width);
+        std::size_t total_size = 0;
+        for (std::size_t plane = 0; plane < plane_count; ++plane) {
+            const std::size_t plane_height =
+                CVPixelBufferGetHeightOfPlane(pixel_buffer, plane);
+            total_size += checked_product(width, plane_height);
+        }
+        payload.resize(total_size);
+
+        std::size_t destination_offset = 0;
+        for (std::size_t plane = 0; plane < plane_count; ++plane) {
+            const auto* source = static_cast<const std::byte*>(
+                CVPixelBufferGetBaseAddressOfPlane(pixel_buffer, plane)
+            );
+            const std::size_t source_stride =
+                CVPixelBufferGetBytesPerRowOfPlane(pixel_buffer, plane);
+            const std::size_t plane_height =
+                CVPixelBufferGetHeightOfPlane(pixel_buffer, plane);
+            if (source == nullptr || source_stride < width) {
+                throw std::runtime_error(
+                    "AVFoundation returned an invalid pixel-buffer plane."
+                );
+            }
+            for (std::size_t row = 0; row < plane_height; ++row) {
+                std::memcpy(
+                    payload.data() + destination_offset,
+                    source + row * source_stride,
+                    width
+                );
+                destination_offset += width;
+            }
+        }
+    }
+    else {
+        std::size_t bytes_per_pixel = 0;
+        switch (format) {
+        case kCVPixelFormatType_422YpCbCr8_yuvs:
+        case kCVPixelFormatType_422YpCbCr8:
+            bytes_per_pixel = 2;
+            break;
+        case kCVPixelFormatType_24RGB:
+            bytes_per_pixel = 3;
+            break;
+        case kCVPixelFormatType_32BGRA:
+            bytes_per_pixel = 4;
+            break;
+        default:
+            break;
+        }
+
+        const std::size_t source_stride =
+            CVPixelBufferGetBytesPerRow(pixel_buffer);
+        const std::size_t packed_stride = bytes_per_pixel == 0
+            ? source_stride
+            : checked_product(width, bytes_per_pixel);
+        if (packed_stride > std::numeric_limits<std::uint32_t>::max()) {
+            throw std::overflow_error("AVFoundation frame stride overflowed.");
+        }
+        stride = static_cast<std::uint32_t>(packed_stride);
+        payload.resize(checked_product(packed_stride, height));
+
+        const auto* source = static_cast<const std::byte*>(
+            CVPixelBufferGetBaseAddress(pixel_buffer)
+        );
+        if (source == nullptr || source_stride < packed_stride) {
+            throw std::runtime_error(
+                "AVFoundation returned an invalid pixel buffer."
+            );
+        }
+        for (std::size_t row = 0; row < height; ++row) {
+            std::memcpy(
+                payload.data() + row * packed_stride,
+                source + row * source_stride,
+                packed_stride
+            );
+        }
+    }
+
+    return {
+        true,
+        timestamp_100ns,
+        payload.size(),
+        stride,
+        std::move(payload)
+    };
+}
 
 }  // namespace orvix::capture::detail
 
@@ -70,12 +227,17 @@ struct SampleQueue final {
             CMTIME_IS_NUMERIC(timestamp_100ns)
                 ? timestamp_100ns.value
                 : 0;
-        const std::size_t byte_count =
-            CMSampleBufferGetTotalSampleSize(sampleBuffer);
+        auto frame = orvix::capture::detail::frame_from_sample(
+            sampleBuffer,
+            timestamp_value
+        );
 
         {
             const std::lock_guard lock(queue->mutex);
-            queue->frames.push_back({true, timestamp_value, byte_count});
+            if (queue->frames.size() >= 3) {
+                queue->frames.pop_front();
+            }
+            queue->frames.push_back(std::move(frame));
         }
 
         queue->ready.notify_one();
@@ -141,6 +303,23 @@ std::string pixel_format_name(const FourCharCode value) {
         return "BGRA32";
     default:
         return fourcc_string(value);
+    }
+}
+
+std::uint32_t packed_stride(
+    const FourCharCode value,
+    const std::uint32_t width
+) noexcept {
+    switch (value) {
+    case kCVPixelFormatType_422YpCbCr8_yuvs:
+    case kCVPixelFormatType_422YpCbCr8:
+        return width * 2U;
+    case kCVPixelFormatType_24RGB:
+        return width * 3U;
+    case kCVPixelFormatType_32BGRA:
+        return width * 4U;
+    default:
+        return width;
     }
 }
 
@@ -328,7 +507,7 @@ public:
             );
         }
 
-        const FrameReadResult frame = queue_.frames.front();
+        FrameReadResult frame = std::move(queue_.frames.front());
         queue_.frames.pop_front();
         return frame;
     }
@@ -501,26 +680,35 @@ VideoFormat AvFoundationCamera::configure(const VideoFormatTarget& target) {
 
         AVCaptureVideoDataOutput* output =
             [[AVCaptureVideoDataOutput alloc] init];
-        output.alwaysDiscardsLateVideoFrames = NO;
+        output.alwaysDiscardsLateVideoFrames = YES;
 
-        FourCharCode output_pixel_format = native.pixel_format;
-        NSNumber* requested_pixel_format = @(output_pixel_format);
-        if (![
-            output.availableVideoCVPixelFormatTypes
-            containsObject:requested_pixel_format
-        ]) {
-            requested_pixel_format =
-                output.availableVideoCVPixelFormatTypes.firstObject;
-
-            if (requested_pixel_format == nil) {
-                delegate.sampleQueueContext = nullptr;
-                throw std::runtime_error(
-                    "AVFoundation did not expose an output pixel format."
-                );
+        NSArray<NSNumber*>* preferred_pixel_formats = @[
+            @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange),
+            @(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange),
+            @(kCVPixelFormatType_32BGRA),
+            @(kCVPixelFormatType_422YpCbCr8_yuvs),
+            @(kCVPixelFormatType_422YpCbCr8),
+            @(kCVPixelFormatType_24RGB)
+        ];
+        NSNumber* requested_pixel_format = nil;
+        for (NSNumber* candidate in preferred_pixel_formats) {
+            if ([
+                output.availableVideoCVPixelFormatTypes
+                containsObject:candidate
+            ]) {
+                requested_pixel_format = candidate;
+                break;
             }
-
-            output_pixel_format = requested_pixel_format.unsignedIntValue;
         }
+
+        if (requested_pixel_format == nil) {
+            delegate.sampleQueueContext = nullptr;
+            throw std::runtime_error(
+                "AVFoundation did not expose an ORVIX display format."
+            );
+        }
+        const FourCharCode output_pixel_format =
+            requested_pixel_format.unsignedIntValue;
 
         output.videoSettings = @{
             (NSString*)kCVPixelBufferPixelFormatTypeKey:
@@ -549,6 +737,10 @@ VideoFormat AvFoundationCamera::configure(const VideoFormatTarget& target) {
         VideoFormat configured = selected;
         configured.pixel_format = pixel_format_name(output_pixel_format);
         configured.compressed = false;
+        configured.stride = packed_stride(
+            output_pixel_format,
+            configured.width
+        );
         impl_->configured_format = configured;
         impl_->format_configured = true;
         return configured;
@@ -556,7 +748,8 @@ VideoFormat AvFoundationCamera::configure(const VideoFormatTarget& target) {
 }
 
 CaptureSummary AvFoundationCamera::capture_frames(
-    const std::size_t requested_frames
+    const std::size_t requested_frames,
+    FrameSink* const sink
 ) {
     @autoreleasepool {
         if (!is_open()) {
@@ -588,7 +781,8 @@ CaptureSummary AvFoundationCamera::capture_frames(
                 reader,
                 requested_frames,
                 impl_->configured_format,
-                20
+                20,
+                sink
             );
             [impl_->session stopRunning];
             return summary;

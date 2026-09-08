@@ -32,7 +32,24 @@ Processed Video     ORVIX Insight
 
 ## Data Plane
 
-Large frame payloads move through shared memory.
+Large frame payloads move through shared memory. Bridge implements a three-slot
+ring with a seqlock per slot. Capture publishes without waiting for Vision;
+Vision copies only a stable frame, acknowledges the consumed sequence and
+converts the payload with NumPy according to its format and stride.
+
+```text
+Native or synthetic FrameReader
+            |
+            v
+ContinuousFrameCapture -> SharedMemoryPublisher
+                              |
+                         ORVX protocol v1
+                              |
+                              v
+                    SharedMemoryReader (Python)
+                              |
+                         NumPy + OpenCV
+```
 
 ## Control Plane
 

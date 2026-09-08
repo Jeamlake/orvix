@@ -4,7 +4,10 @@ set(
     src/capture/continuous_frame_capture.cpp
     src/capture/diagnostic_error.cpp
     src/capture/platform_factory.cpp
+    src/capture/synthetic_frame_reader.cpp
     src/capture/video_format_selector.cpp
+    src/ipc/shared_memory_publisher.cpp
+    src/ipc/shared_memory_region.cpp
     src/observability/logger.cpp
 )
 
@@ -114,6 +117,12 @@ elseif(APPLE)
         ${COREVIDEO_FRAMEWORK}
         ${FOUNDATION_FRAMEWORK}
     )
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_link_libraries(
+        orvix_capture_core
+        PRIVATE
+        rt
+    )
 endif()
 
 add_executable(
@@ -168,6 +177,8 @@ if(ORVIX_BUILD_TESTS)
         continuous_frame_capture_tests
         logger_tests
         platform_factory_tests
+        shared_memory_publisher_tests
+        synthetic_frame_reader_tests
         video_format_selector_tests
     )
 
@@ -293,6 +304,16 @@ if(ORVIX_BUILD_TESTS)
     add_test(
         NAME TC_LOG_001_STRUCTURED_CAPTURE_LOGGING
         COMMAND logger_tests
+    )
+
+    add_test(
+        NAME TC_IPC_001_SHARED_MEMORY_PUBLICATION
+        COMMAND shared_memory_publisher_tests
+    )
+
+    add_test(
+        NAME TC_SYN_001_SYNTHETIC_FRAME_SOURCE
+        COMMAND synthetic_frame_reader_tests
     )
 
     set_tests_properties(

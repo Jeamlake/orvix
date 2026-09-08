@@ -262,8 +262,14 @@ std::vector<NativeFormat> enumerate_formats(
 
 class V4l2FrameReader final : public FrameReader {
 public:
-    explicit V4l2FrameReader(const int descriptor)
-        : descriptor_(descriptor) {}
+    V4l2FrameReader(
+        const int descriptor,
+        const std::vector<MappedBuffer>& buffers,
+        const std::uint32_t stride
+    )
+        : descriptor_(descriptor),
+          buffers_(buffers),
+          stride_(stride) {}
 
     FrameReadResult read_next() override {
         pollfd descriptor_status{};
@@ -324,6 +330,24 @@ public:
         }
         const std::size_t byte_count = buffer.bytesused;
 
+        if (
+            buffer.index >= buffers_.size() ||
+            byte_count > buffers_[buffer.index].length
+        ) {
+            throw std::runtime_error(
+                "V4L2 returned an invalid capture buffer."
+            );
+        }
+
+        std::vector<std::byte> payload(byte_count);
+        if (byte_count != 0) {
+            std::memcpy(
+                payload.data(),
+                buffers_[buffer.index].address,
+                byte_count
+            );
+        }
+
         if (retry_ioctl(descriptor_, VIDIOC_QBUF, &buffer) < 0) {
             if (errno == ENODEV || errno == EIO) {
                 throw DiagnosticError(
@@ -336,11 +360,19 @@ public:
             throw_system_error("VIDIOC_QBUF");
         }
 
-        return {true, timestamp, byte_count};
+        return {
+            true,
+            timestamp,
+            byte_count,
+            stride_,
+            std::move(payload)
+        };
     }
 
 private:
     int descriptor_;
+    const std::vector<MappedBuffer>& buffers_;
+    std::uint32_t stride_{};
 };
 
 }  // namespace
@@ -515,6 +547,7 @@ VideoFormat V4l2Camera::configure(const VideoFormatTarget& target) {
     configured.compressed = compressed_pixel_format(
         requested.fmt.pix.pixelformat
     );
+    configured.stride = requested.fmt.pix.bytesperline;
 
     if (
         parameter_result == 0 &&
@@ -592,7 +625,8 @@ VideoFormat V4l2Camera::configure(const VideoFormatTarget& target) {
 }
 
 CaptureSummary V4l2Camera::capture_frames(
-    const std::size_t requested_frames
+    const std::size_t requested_frames,
+    FrameSink* const sink
 ) {
     if (!is_open()) {
         throw std::logic_error("A camera must be open before capturing frames.");
@@ -604,12 +638,17 @@ CaptureSummary V4l2Camera::capture_frames(
         );
     }
 
-    V4l2FrameReader reader(impl_->descriptor);
+    V4l2FrameReader reader(
+        impl_->descriptor,
+        impl_->buffers,
+        impl_->configured_format.stride
+    );
     return ContinuousFrameCapture::run(
         reader,
         requested_frames,
         impl_->configured_format,
-        20
+        20,
+        sink
     );
 }
 

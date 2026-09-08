@@ -105,6 +105,8 @@ orvix-capture select --index <N>
 orvix-capture open --index <N>
 orvix-capture formats --index <N>
 orvix-capture capture --index <N>
+orvix-capture bridge --index <N> --frames 900
+orvix-capture bridge --synthetic --frames 900
 ```
 
 The `capture` command opens the selected camera, negotiates the closest native
@@ -116,8 +118,23 @@ Every command writes structured lifecycle and failure diagnostics to
 `logs/orvix-capture.log`. Expected failures include a stable diagnostic code
 and a non-zero process exit code.
 
+## Bridge and RAW viewer
+
+With the `bridge` producer running, open a second terminal and execute:
+
+```text
+python -m orvix.ui.viewer
+```
+
+Python receives frames through shared memory, interprets them with NumPy and
+opens the **ORVIX Live - RAW** window through OpenCV. `Q` or `Esc` closes the
+viewer without interrupting the C++ producer. Headless validation is available
+through `python -m orvix.ui.viewer --headless --frames 30`.
+
 Delivery 1 validation records are indexed in
 [`docs/en/evidence/delivery-01/README.md`](docs/en/evidence/delivery-01/README.md).
+Delivery 2 evidence and presentation instructions are indexed in
+[`docs/en/evidence/delivery-02/README.md`](docs/en/evidence/delivery-02/README.md).
 
 The complete documentation is available in [English](docs/en/README.md) and
 [Spanish](docs/es/README.md).
@@ -128,7 +145,7 @@ Frames are ephemeral by default and are not persisted automatically.
 
 ## Current milestone
 
-**Delivery 1 — Foundation + Native Capture (functional scope complete)**
+**Delivery 2 — ORVIX Bridge and RAW visualization (functional scope complete)**
 
 ## License
 
