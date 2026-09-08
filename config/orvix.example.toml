@@ -4,6 +4,11 @@ width = 1280
 height = 720
 fps = 30
 
+[bridge]
+shared_memory_name = "orvix-camera-v1"
+slot_count = 3
+default_frames = 900
+
 [logging]
 level = "INFO"
 

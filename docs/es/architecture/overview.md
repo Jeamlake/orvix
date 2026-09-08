@@ -35,7 +35,24 @@ Video procesado     ORVIX Insight
 ## Plano de datos
 
 Los frames, que son cargas de gran tamaño, se transportan mediante memoria
-compartida.
+compartida. El Bridge implementa un anillo de tres slots con seqlock por slot.
+Capture publica sin esperar a Vision; Vision copia solamente un frame estable,
+confirma la secuencia consumida y transforma el payload con NumPy según su
+formato y stride.
+
+```text
+FrameReader nativo o sintético
+            |
+            v
+ContinuousFrameCapture -> SharedMemoryPublisher
+                              |
+                         Protocolo ORVX v1
+                              |
+                              v
+                    SharedMemoryReader (Python)
+                              |
+                         NumPy + OpenCV
+```
 
 ## Plano de control
 

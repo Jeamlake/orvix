@@ -121,6 +121,8 @@ orvix-capture select --index <N>
 orvix-capture open --index <N>
 orvix-capture formats --index <N>
 orvix-capture capture --index <N>
+orvix-capture bridge --index <N> --frames 900
+orvix-capture bridge --synthetic --frames 900
 ```
 
 El comando `capture` abre la cámara seleccionada, negocia el formato nativo más
@@ -132,8 +134,23 @@ Cada comando registra diagnósticos estructurados en
 `logs/orvix-capture.log`. Los fallos esperados incluyen un código de diagnóstico
 estable y un código de salida distinto de cero.
 
+## Puente y visor RAW
+
+Con el productor `bridge` activo, abrir una segunda terminal y ejecutar:
+
+```text
+python -m orvix.ui.viewer
+```
+
+Python recibe los frames por memoria compartida, los interpreta con NumPy y
+abre la ventana **ORVIX Live - RAW** mediante OpenCV. `Q` o `Esc` cierra el
+visor sin interrumpir el productor C++. También se puede validar sin interfaz
+con `python -m orvix.ui.viewer --headless --frames 30`.
+
 La evidencia de la Entrega 1 está organizada en
 [`docs/es/evidence/delivery-01/README.md`](docs/es/evidence/delivery-01/README.md).
+La evidencia y la guía de exposición de la Entrega 2 están en
+[`docs/es/evidence/delivery-02/README.md`](docs/es/evidence/delivery-02/README.md).
 
 La documentación completa está disponible en [inglés](docs/en/README.md) y
 [español](docs/es/README.md).
@@ -145,7 +162,7 @@ automáticamente.
 
 ## Hito actual
 
-**Entrega 1 — Fundamentos y captura nativa (alcance funcional completo)**
+**Entrega 2 — ORVIX Bridge y visualización RAW (alcance funcional completo)**
 
 ## Licencia
 

@@ -1,6 +1,6 @@
 # ORVIX Software Requirements Specification
 
-Version: 0.1
+Version: 0.2
 
 ## Functional Requirements
 
@@ -81,3 +81,16 @@ Camera
 | CA-008 | Clean checkout can be built using documentation. |
 | CA-009 | Hardware-independent CI succeeds. |
 | CA-010 | The native core builds and tests on Windows, Linux and macOS. |
+
+## Delivery 2 Acceptance Criteria
+
+| ID | Criterion |
+|---|---|
+| CA2-001 | C++ publishes frame payloads and metadata through a versioned shared-memory protocol. |
+| CA2-002 | Python consumes frames without opening the camera. |
+| CA2-003 | NumPy interprets bytes according to format, dimensions and stride. |
+| CA2-004 | OpenCV displays RAW mode and exits with `Q` or `Esc`. |
+| CA2-005 | The consumer detects sequence gaps. |
+| CA2-006 | The system reports buffer utilization and overwrites. |
+| CA2-007 | Capture continues if Vision exits before the producer. |
+| CA2-008 | A synthetic source validates the complete bridge without hardware on Windows, Linux and macOS. |

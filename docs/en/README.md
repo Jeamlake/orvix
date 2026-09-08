@@ -7,6 +7,8 @@
 - [Software requirements](requirements/software-requirements.md)
 - [Requirements traceability](requirements/traceability.md)
 - [Delivery 1 evidence](evidence/delivery-01/README.md)
+- [Delivery 2 evidence](evidence/delivery-02/README.md)
+- [Delivery 2 demonstration guide](evidence/delivery-02/demonstration-guide.md)
 - [Cross-platform validation](evidence/cross-platform-native-validation.md)
 - [Capture diagnostics](observability/capture-diagnostics.md)
 - [IPC Protocol v1](protocol/ipc-v1.md)

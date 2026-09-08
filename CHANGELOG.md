@@ -8,6 +8,18 @@
 
 ### Added
 
+- Versioned `ORVX` IPC v1 global header and three-slot shared-memory ring.
+- C++ shared-memory producer for physical and synthetic frames.
+- Camera-independent Python consumer with seqlock validation and sequence
+  acknowledgement.
+- NumPy/OpenCV decoding for NV12, YUY2, UYVY, I420, YV12, RGB24, BGRA32,
+  ARGB32 and MJPG.
+- `ORVIX Live - RAW` viewer, FPS reporting, skipped-frame detection and buffer
+  utilization.
+- Synthetic NV12 source and cross-process integration test on Windows, Linux
+  and macOS.
+- Bilingual Delivery 2 evidence and reproducible demonstration guide.
+
 - Parallel English and Spanish documentation sections with equivalent
   architecture, requirements, platform, decision and validation records.
 - Platform-neutral native camera contract and build-time backend factory.

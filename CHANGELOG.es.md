@@ -6,6 +6,18 @@
 
 ### Agregado
 
+- Protocolo IPC `ORVX` v1 con header global versionado y anillo de tres slots.
+- Productor C++ de memoria compartida para frames físicos y sintéticos.
+- Consumidor Python independiente de la cámara, validación de seqlock y
+  confirmación de secuencia.
+- Decodificación NumPy/OpenCV para NV12, YUY2, UYVY, I420, YV12, RGB24,
+  BGRA32, ARGB32 y MJPG.
+- Visor `ORVIX Live - RAW`, medición de FPS, detección de frames omitidos y
+  utilización del búfer.
+- Fuente sintética NV12 y prueba integrada entre procesos en Windows, Linux y
+  macOS.
+- Evidencia bilingüe y guía reproducible para la Entrega 2.
+
 - Secciones paralelas de documentación en inglés y español con registros
   equivalentes de arquitectura, requisitos, plataformas, decisiones y evidencia.
 - Contrato nativo de cámara independiente de plataforma y factoría seleccionada
