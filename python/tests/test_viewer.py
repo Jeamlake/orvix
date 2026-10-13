@@ -66,3 +66,49 @@ def test_raw_mode_displays_decoded_frame(monkeypatch):
     assert result == 0
     assert displayed[0][0] == "ORVIX Live - RAW"
     assert displayed[0][1].shape == (2, 4, 3)
+
+
+def test_window_events_are_processed_during_frame_stall(monkeypatch):
+    class StalledReader(FakeReader):
+        def read_latest(self):
+            return None
+
+    monkeypatch.setattr(viewer, "SharedMemoryReader", StalledReader)
+    monkeypatch.setattr(viewer.cv2, "waitKey", lambda _delay: ord("q"))
+    monkeypatch.setattr(viewer.cv2, "destroyAllWindows", lambda: None)
+    assert viewer.run(Namespace(name="test", frames=0, attach_timeout=0,
+                               poll_ms=0, headless=False)) == 3
+
+
+def test_headless_stall_is_bounded(monkeypatch):
+    import pytest
+
+    class StalledReader(FakeReader):
+        def read_latest(self):
+            return None
+
+    monkeypatch.setattr(viewer, "SharedMemoryReader", StalledReader)
+    with pytest.raises(TimeoutError):
+        viewer.run(Namespace(name="test", frames=0, attach_timeout=0,
+                             poll_ms=1, headless=True, stall_timeout=0.02))
+
+
+def test_attach_delay_does_not_consume_frame_stall_timeout(monkeypatch):
+    clock = [0.0]
+
+    class DelayedReader(FakeReader):
+        def __enter__(self):
+            clock[0] = 10.0
+            self.first_poll = True
+            return self
+
+        def read_latest(self):
+            if self.first_poll:
+                self.first_poll = False
+                return None
+            return super().read_latest()
+
+    monkeypatch.setattr(viewer, "SharedMemoryReader", DelayedReader)
+    monkeypatch.setattr(viewer.time, "monotonic", lambda: clock[0])
+    assert viewer.run(Namespace(name="test", frames=1, attach_timeout=15,
+                               poll_ms=0, headless=True, stall_timeout=5)) == 0

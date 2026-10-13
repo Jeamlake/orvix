@@ -6,6 +6,22 @@
 
 ### Agregado
 
+- Interfaz Qt de la Entrega 2 con selección de cámara, demo, vista RAW, zoom y
+  desplazamiento, métricas del puente, diagnóstico y reconexión del consumidor.
+- Bridge continuo con parada explícita del propietario y metadatos acotados.
+- Recetas de empaquetado Windows, generadores de instalador y ZIP fuente,
+  entregables académicos y pruebas de escritorio en CI.
+
+### Corregido
+
+- La captura continua diagnostica lecturas vacías consecutivas en lugar de
+  sumar pausas aisladas entre frames válidos.
+- El visor atiende eventos aun sin frames y separa el timeout de conexión del
+  timeout de video. El cierre de escritorio maneja fallos al iniciar la búsqueda.
+- Los fallos de compilación/pruebas PowerShell se propagan y el ZIP se regenera.
+
+### Agregado previamente
+
 - Protocolo IPC `ORVX` v1 con header global versionado y anillo de tres slots.
 - Productor C++ de memoria compartida para frames físicos y sintéticos.
 - Consumidor Python independiente de la cámara, validación de seqlock y

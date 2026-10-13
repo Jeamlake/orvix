@@ -33,12 +33,14 @@ using capture::DiagnosticError;
 using capture::VideoFormat;
 using observability::Logger;
 
-constexpr std::string_view kVersion = "0.2.0";
+constexpr std::string_view kVersion = "0.2.1";
 constexpr std::size_t kDefaultCaptureFrames = 120;
 constexpr std::size_t kDefaultBridgeFrames = 900;
 
 struct BridgeOptions final {
     bool synthetic{false};
+    bool continuous{false};
+    bool has_frames{false};
     bool has_index{false};
     std::size_t index{};
     std::size_t frames{kDefaultBridgeFrames};
@@ -62,6 +64,7 @@ void print_usage() {
         << "  orvix-capture capture --index <N>\n"
         << "  orvix-capture bridge --index <N> [--frames <N>] [--name <NAME>]\n"
         << "  orvix-capture bridge --synthetic [--frames <N>] [--name <NAME>]\n"
+        << "  Add --continuous to run until an explicit IPC stop request.\n"
         << "  orvix-capture --help\n";
 }
 
@@ -98,6 +101,13 @@ BridgeOptions parse_bridge_options(const int argc, char* argv[]) {
 
     for (int position = 2; position < argc; ++position) {
         const std::string_view argument = argv[position];
+        if (argument == "--continuous") {
+            if (options.continuous) {
+                throw std::invalid_argument("--continuous was specified twice.");
+            }
+            options.continuous = true;
+            continue;
+        }
         if (argument == "--synthetic") {
             if (options.synthetic) {
                 throw std::invalid_argument("--synthetic was specified twice.");
@@ -130,11 +140,21 @@ BridgeOptions parse_bridge_options(const int argc, char* argv[]) {
             options.has_index = true;
         }
         else if (argument == "--frames") {
+            if (options.has_frames) {
+                throw std::invalid_argument("--frames was specified twice.");
+            }
+            options.has_frames = true;
             options.frames = parse_positive_size(value, "Frame count");
         }
         else {
             options.name = value;
         }
+    }
+    if (options.continuous && options.has_frames) {
+        throw std::invalid_argument("Use --continuous or --frames, not both.");
+    }
+    if (options.continuous) {
+        options.frames = 0;
     }
 
     if (options.synthetic == options.has_index) {

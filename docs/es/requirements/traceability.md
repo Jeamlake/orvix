@@ -14,14 +14,25 @@
 | RF-008 | Vision | 2 | TC-IPC-006 | Verificado |
 | RF-009 | Vision | 2 | TC-VIS-001 | Verificado |
 | RF-010 | Vision | 2 | TC-VIS-001 | Verificado |
+| RF-011 | Vision | 3 | Pendiente | Planificado |
+| RF-012 | Vision | 3 | Pendiente | Planificado |
 | RF-013 | Vision | 3 | TC-VIS-004 | Planificado |
+| RF-014 | Vision | 3 | Pendiente | Planificado |
 | RF-015 | Insight | 1 | TC-MET-001 | Verificado |
+| RF-016 | Insight | 3 | Pendiente | Planificado |
 | RF-017 | Bridge | 2 | TC-IPC-008 | Verificado |
+| RF-018 | Insight | 3 | Pendiente | Planificado |
 | RF-019 | Insight | 3 | TC-MET-004 | Planificado |
 | RF-020 | Insight | 2 | TC-MET-005 | Verificado |
 | RF-021 | Insight | 3 | TC-DB-001 | Planificado |
+| RF-022 | Insight | 3 | Pendiente | Planificado |
 | RF-023 | Capture | 1 | TC-CAP-023 | Verificado |
 | RF-024 | Capture / Vision | 2 | TC-IPC-005 | Verificado |
 | RF-025 | Infraestructura de pruebas | 2 | TC-SYN-001 | Verificado |
 | RF-026 | Todos | 1 | TC-LOG-001 | Verificado |
 | RF-027 | Capture | 1 | TC-CAP-003-PLATFORM | Verificado |
+
+Interfaz desktop de la entrega 2: `python/tests/test_desktop.py` cubre layout,
+inicio/parada/reinicio, fallo nativo, índice inválido, cancelación y reconexión
+del consumidor sin reiniciar Capture. La evidencia y los límites de validación
+se describen en [desktop-validation.md](../evidence/delivery-02/desktop-validation.md).

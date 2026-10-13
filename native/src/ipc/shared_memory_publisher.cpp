@@ -306,6 +306,8 @@ SharedMemoryPublisher::SharedMemoryPublisher(
         ),
         0ULL
     );
+    std::construct_at(reinterpret_cast<std::uint32_t*>(
+        data + header_offset::stop_request), 0U);
     atomic_store_u32(
         data,
         header_offset::producer_state,
@@ -440,6 +442,13 @@ void SharedMemoryPublisher::publish(
             static_cast<std::uint64_t>(std::llround(fps * 1000.0))
         );
     }
+}
+
+bool SharedMemoryPublisher::stop_requested() const noexcept {
+    auto& value = *reinterpret_cast<std::uint32_t*>(
+        region_->data() + header_offset::stop_request);
+    return std::atomic_ref<std::uint32_t>(value).load(
+        std::memory_order_acquire) != 0U;
 }
 
 void SharedMemoryPublisher::mark_completed() noexcept {

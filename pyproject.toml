@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "orvix"
-version = "0.2.0"
+version = "0.2.1"
 description = "Optical Real-time Video Ingestion eXchange"
 requires-python = ">=3.8,<3.14"
 license = {text = "MIT"}
@@ -12,8 +12,15 @@ dependencies = []
 
 [project.scripts]
 orvix-viewer = "orvix.ui.viewer:main"
+orvix-desktop = "orvix.ui.desktop:main"
 
 [project.optional-dependencies]
+desktop = [
+    "PySide6-Essentials>=6.8,<6.9; python_version >= '3.9'",
+    "numpy>=1.26,<3; python_version >= '3.9'",
+    "opencv-python>=4.8,<5; python_version >= '3.9'"
+]
+package = ["pyinstaller>=6.11,<7; python_version >= '3.9'"]
 vision = [
     "numpy>=1.24,<2; python_version < '3.9'",
     "numpy>=1.26,<3; python_version >= '3.9'",
@@ -28,6 +35,9 @@ package-dir = {"" = "python/src"}
 
 [tool.setuptools.packages.find]
 where = ["python/src"]
+
+[tool.setuptools.package-data]
+"orvix.ui" = ["assets/*.svg"]
 
 [tool.pytest.ini_options]
 testpaths = ["python/tests"]

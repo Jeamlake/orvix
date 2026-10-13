@@ -1,0 +1,24 @@
+ORVIX Avance 2 - 0.2.1
+ORVIX source: https://github.com/Jeamlake/orvix (MIT)
+Local modifications and packaging recipes: supplied in the project checkout.
+
+Qt / PySide6 Essentials / Shiboken 6.8.3
+QtCore, QtGui and QtWidgets are dynamically linked. Open-source licenses
+include LGPL version 3; full LGPL and GPL texts accompany this distribution.
+Users may replace the shared Qt libraries with compatible modified versions
+and debug modifications to these libraries. No restriction is imposed by
+ORVIX on reverse engineering for that purpose.
+Corresponding upstream source:
+https://download.qt.io/archive/qt/6.8/6.8.3/submodules/
+https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.3-src/
+https://code.qt.io/cgit/qt/qtbase.git/?h=v6.8.3
+https://code.qt.io/cgit/pyside/pyside-setup.git/?h=v6.8.3
+
+Python 3.11 (PSF license), NumPy (BSD), OpenCV (Apache 2.0),
+OpenBLAS (BSD), PyInstaller (GPL with bootloader exception).
+The license files shipped by these packages are included by the packaging
+script from the installed distribution metadata. PyInstaller is a build tool;
+its bootloader exception permits distribution of this application.
+
+This package is not signed. It does not install drivers, change camera
+permissions or open the webcam until the user explicitly starts capture.

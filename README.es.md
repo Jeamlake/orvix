@@ -1,5 +1,23 @@
 # ORVIX
 
+## Aplicación de escritorio — Avance 2 (0.2.1)
+
+Interfaz real RAW conectada al motor C++, con selección de cámara, demo,
+parada limpia, zoom y diagnóstico. No incluye filtros ni histórico SQLite.
+Para ejecutar desde el código:
+
+```powershell
+./.venv/Scripts/python.exe -m pip install -e '.[desktop]'
+./scripts/build.ps1
+./.venv/Scripts/python.exe -m orvix.ui.desktop
+```
+
+El instalador Windows x64 está en `entregables/Avance2_ORVIX_2026-10-11/Aplicacion`.
+[Validación, alcance y empaquetado](docs/es/evidence/delivery-02/desktop-validation.md).
+Para regenerar el instalador usa `scripts/package-desktop.ps1`; los binarios
+están excluidos de Git. Los documentos académicos y su anexo de implementación
+se versionan en `entregables`.
+
 [English](README.md) | [Español](README.es.md)
 
 **Optical Real-time Video Ingestion eXchange**

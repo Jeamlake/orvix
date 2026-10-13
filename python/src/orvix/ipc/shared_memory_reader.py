@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import struct
 import time
 from multiprocessing import resource_tracker, shared_memory
 from typing import Optional
@@ -38,7 +39,11 @@ class SharedMemoryReader:
                 resource_tracker.unregister(self._shared._name, "shared_memory")
             except (AttributeError, KeyError):
                 pass
-        read_header(self._shared.buf)
+        try:
+            read_header(self._shared.buf)
+        except Exception:
+            self.close()
+            raise
 
     @property
     def header(self) -> SharedHeader:
@@ -49,6 +54,10 @@ class SharedMemoryReader:
 
     def acknowledge(self, sequence: int) -> None:
         acknowledge_frame(self._shared.buf, sequence)
+
+    def request_stop(self) -> None:
+        """Explicitly stop a producer supporting the IPC v1 reserved extension."""
+        struct.pack_into("<I", self._shared.buf, 120, 1)
 
     def close(self) -> None:
         if not self._closed:

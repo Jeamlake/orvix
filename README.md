@@ -1,5 +1,18 @@
 # ORVIX
 
+## Desktop application — Delivery 2 (0.2.1)
+
+The RAW desktop UI now controls the native C++ engine: camera selection,
+synthetic demo, explicit stop, aspect-fit/zoom, live telemetry and diagnostics.
+It does not implement Delivery 3 filters, detection or SQLite history.
+Install the `desktop` extra and run `python -m orvix.ui.desktop` after building
+the native engine. The Windows x64 installer is in
+`entregables/Avance2_ORVIX_2026-10-11/Aplicacion`.
+[Validation and packaging notes](docs/en/evidence/delivery-02/desktop-validation.md).
+Rebuild the installer with `scripts/package-desktop.ps1`; executable binaries
+are excluded from Git. Academic documents and their implementation addendum
+are versioned under `entregables`.
+
 [English](README.md) | [Español](README.es.md)
 
 **Optical Real-time Video Ingestion eXchange**

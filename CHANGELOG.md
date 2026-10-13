@@ -8,6 +8,22 @@
 
 ### Added
 
+- Delivery 2 Qt desktop UI with camera selection, synthetic demo, RAW preview,
+  bounded zoom/pan, bridge metrics, diagnostics and consumer reconnection.
+- Continuous native bridge with explicit owner stop and bounded metadata memory.
+- Windows packaging recipes, installer and source archive builders, academic
+  deliverables and desktop CI lifecycle coverage.
+
+### Fixed
+
+- Continuous captures diagnose consecutive empty reads rather than accumulated
+  pauses between valid frames.
+- Viewer events remain responsive when frames stall; attach and frame timeouts
+  are independent. Desktop shutdown also handles enumeration startup failure.
+- PowerShell build/test failures propagate; source archives can be regenerated.
+
+### Previously added
+
 - Versioned `ORVX` IPC v1 global header and three-slot shared-memory ring.
 - C++ shared-memory producer for physical and synthetic frames.
 - Camera-independent Python consumer with seqlock validation and sequence

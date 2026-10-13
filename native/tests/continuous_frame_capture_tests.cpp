@@ -32,6 +32,15 @@ private:
 
 }  // namespace
 
+class StopAfterTwoSink final : public orvix::capture::FrameSink {
+public:
+    void publish(const orvix::capture::FrameMetadata&, std::span<const std::byte>) override {
+        ++count;
+    }
+    bool stop_requested() const noexcept override { return count >= 2; }
+    int count{};
+};
+
 int main() {
     SyntheticFrameReader reader({
         {false, 0, 0},
@@ -116,6 +125,18 @@ int main() {
 
     if (!stalled_stream_rejected) {
         std::cerr << "stalled camera stream was not diagnosed\n";
+        return EXIT_FAILURE;
+    }
+
+    StopAfterTwoSink sink;
+    SyntheticFrameReader continuous({
+        {false, 0, 0}, {true, 1000000, 0},
+        {false, 0, 0}, {true, 1333333, 0}, {true, 1666666, 0}
+    });
+    const auto bounded = orvix::capture::ContinuousFrameCapture::run(
+        continuous, 0, {0, 4, 2, 30, 1, "NV12", false}, 1, &sink);
+    if (bounded.captured_frames != 2 || bounded.empty_reads != 2 || !bounded.frames.empty()) {
+        std::cerr << "continuous bridge stop/bounded-memory assertion failed\n";
         return EXIT_FAILURE;
     }
 
