@@ -80,7 +80,9 @@ Subsistema Python responsable del procesamiento de alto nivel.
 ### ORVIX Insight
 
 Subsistema de observabilidad para FPS, frames perdidos, latencia, detecciones y
-métricas históricas.
+métricas históricas. La telemetría se puede guardar en SQLite mediante
+[`orvix.storage.SQLiteTelemetryStore`](docs/es/database/sqlite-schema.md): se
+registran fuentes, sesiones, muestras y diagnósticos, nunca los frames.
 
 ## Hoja de ruta de entregas
 

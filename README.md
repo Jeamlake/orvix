@@ -64,7 +64,11 @@ Inter-process communication subsystem responsible for shared-memory frame transp
 Python subsystem responsible for high-level frame processing.
 
 ### ORVIX Insight
-Observability subsystem responsible for FPS, dropped frames, latency, detections and historical metrics.
+
+Observability subsystem for FPS, dropped frames, latency, detections, and
+historical metrics. Telemetry can be stored in SQLite through
+[`orvix.storage.SQLiteTelemetryStore`](docs/en/database/sqlite-schema.md):
+sources, sessions, samples, and diagnostics are recorded, never frames.
 
 ## Delivery roadmap
 

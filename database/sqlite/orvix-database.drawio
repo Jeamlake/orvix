@@ -1,0 +1,40 @@
+<mxfile host="app.diagrams.net" modified="2026-10-12T00:00:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="orvix-telemetry-er" name="ORVIX SQLite ERD">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="ORVIX · Base de datos SQLite" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1;fontColor=#16324F;" vertex="1" parent="1">
+          <mxGeometry x="50" y="28" width="1180" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="source" value="&lt;div style=&quot;background:#16324F;color:#fff;padding:10px;font-size:16px;font-weight:bold;&quot;&gt;source&lt;/div&gt;&lt;table cellpadding=&quot;7&quot; cellspacing=&quot;0&quot; style=&quot;width:100%;font-size:13px;&quot;&gt;&lt;tr&gt;&lt;td&gt;PK&lt;/td&gt;&lt;td&gt;source_id&lt;/td&gt;&lt;td&gt;INTEGER&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;kind&lt;/td&gt;&lt;td&gt;TEXT&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;backend&lt;/td&gt;&lt;td&gt;TEXT&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;nombre&lt;/td&gt;&lt;td&gt;TEXT&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#16324F;strokeWidth=2;align=left;verticalAlign=top;spacing=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="150" width="280" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="session" value="&lt;div style=&quot;background:#287271;color:#fff;padding:10px;font-size:16px;font-weight:bold;&quot;&gt;session&lt;/div&gt;&lt;table cellpadding=&quot;7&quot; cellspacing=&quot;0&quot; style=&quot;width:100%;font-size:13px;&quot;&gt;&lt;tr&gt;&lt;td&gt;PK&lt;/td&gt;&lt;td&gt;session_id&lt;/td&gt;&lt;td&gt;INTEGER&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;FK&lt;/td&gt;&lt;td&gt;source_id&lt;/td&gt;&lt;td&gt;INTEGER&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;started_at, ended_at&lt;/td&gt;&lt;td&gt;TEXT&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;status, error_code&lt;/td&gt;&lt;td&gt;TEXT&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;pixel_format, width, height, target_fps&lt;/td&gt;&lt;td&gt;various&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#287271;strokeWidth=2;align=left;verticalAlign=top;spacing=0;" vertex="1" parent="1">
+          <mxGeometry x="410" y="150" width="360" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="metric_sample" value="&lt;div style=&quot;background:#8064A2;color:#fff;padding:10px;font-size:16px;font-weight:bold;&quot;&gt;metric_sample&lt;/div&gt;&lt;table cellpadding=&quot;7&quot; cellspacing=&quot;0&quot; style=&quot;width:100%;font-size:13px;&quot;&gt;&lt;tr&gt;&lt;td&gt;PK&lt;/td&gt;&lt;td&gt;sample_id&lt;/td&gt;&lt;td&gt;INTEGER&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;FK&lt;/td&gt;&lt;td&gt;session_id&lt;/td&gt;&lt;td&gt;INTEGER&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;recorded_at&lt;/td&gt;&lt;td&gt;TEXT&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;capture_fps, processing_fps, latency_ms&lt;/td&gt;&lt;td&gt;REAL&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;skipped_frames, buffer_utilization_pct, buffer_overwrites, detection_count&lt;/td&gt;&lt;td&gt;various&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8064A2;strokeWidth=2;align=left;verticalAlign=top;spacing=0;" vertex="1" parent="1">
+          <mxGeometry x="890" y="100" width="440" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="diagnostic_event" value="&lt;div style=&quot;background:#A64B3C;color:#fff;padding:10px;font-size:16px;font-weight:bold;&quot;&gt;diagnostic_event&lt;/div&gt;&lt;table cellpadding=&quot;7&quot; cellspacing=&quot;0&quot; style=&quot;width:100%;font-size:13px;&quot;&gt;&lt;tr&gt;&lt;td&gt;PK&lt;/td&gt;&lt;td&gt;event_id&lt;/td&gt;&lt;td&gt;INTEGER&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;FK&lt;/td&gt;&lt;td&gt;session_id&lt;/td&gt;&lt;td&gt;INTEGER&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;recorded_at&lt;/td&gt;&lt;td&gt;TEXT&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;severity, code, message&lt;/td&gt;&lt;td&gt;TEXT&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#A64B3C;strokeWidth=2;align=left;verticalAlign=top;spacing=0;" vertex="1" parent="1">
+          <mxGeometry x="890" y="520" width="440" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="schema_metadata" value="schema_metadata · version · applied_at" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3F5F7;strokeColor=#65758B;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="520" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="source_session" value="1 : 0..N" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#287271;strokeWidth=2;startArrow=ERone;startFill=0;endArrow=ERmany;endFill=0;fontSize=12;fontStyle=1;" edge="1" parent="1" source="source" target="session">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="session_metrics" value="1 : 0..N" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#8064A2;strokeWidth=2;startArrow=ERone;startFill=0;endArrow=ERmany;endFill=0;fontSize=12;fontStyle=1;" edge="1" parent="1" source="session" target="metric_sample">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="session_diagnostics" value="1 : 0..N" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#A64B3C;strokeWidth=2;startArrow=ERone;startFill=0;endArrow=ERmany;endFill=0;fontSize=12;fontStyle=1;" edge="1" parent="1" source="session" target="diagnostic_event">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="privacy_note" value="Telemetría local. No se guardan imágenes ni fotogramas." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontColor=#526477;" vertex="1" parent="1">
+          <mxGeometry x="40" y="650" width="700" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

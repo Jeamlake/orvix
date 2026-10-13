@@ -38,6 +38,7 @@ where = ["python/src"]
 
 [tool.setuptools.package-data]
 "orvix.ui" = ["assets/*.svg"]
+"orvix.storage" = ["schema.sql"]
 
 [tool.pytest.ini_options]
 testpaths = ["python/tests"]
