@@ -51,7 +51,8 @@ todos los offsets multibyte están alineados naturalmente.
 | 96 | 8 | uint64 | Última secuencia consumida |
 | 104 | 8 | uint64 | Frames sobrescritos |
 | 112 | 8 | uint64 | FPS del productor multiplicados por 1000 |
-| 120 | 8 | bytes | Reservado |
+| 120 | 4 | uint32 | Solicitud explícita de parada (`0` normal, `1` detener), extensión 0.2.1 |
+| 124 | 4 | bytes | Reservado |
 
 Estados del productor: `0 INITIALIZING`, `1 RUNNING`, `2 STOPPED` y `3 FAILED`.
 
@@ -94,3 +95,9 @@ El productor crea el mapeo de forma exclusiva, publica `RUNNING`, emite frames y
 finaliza con `STOPPED` o `FAILED`. En Windows usa `CreateFileMapping`; en Linux y
 macOS usa `shm_open` y `mmap`. El mapeo se libera al salir el productor; un
 consumidor que ya estaba conectado puede terminar de leer su vista activa.
+
+Desde ORVIX 0.2.1 el propietario de la sesión puede escribir `1` en el offset
+120 para solicitar una parada limpia. `bridge --continuous` captura hasta
+esa solicitud y no acumula todos los metadatos en RAM. Cerrar el consumidor
+no escribe esa solicitud: el productor sigue capturando (RF-024). Los
+productores anteriores ignoran el campo; el resto del layout v1 no cambia.

@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 import time
+import uuid
 from pathlib import Path
 
 import pytest
@@ -58,3 +59,32 @@ def test_synthetic_native_producer_reaches_python_consumer():
     assert "frames=10" in consumer.stdout
     assert producer.returncode == 0, producer_output
     assert "Bridge status: COMPLETED" in producer_output
+
+
+@pytest.mark.integration
+def test_continuous_bridge_stops_only_on_explicit_owner_request():
+    from orvix.ipc import SharedMemoryReader
+
+    root = Path(__file__).resolve().parents[3]
+    name = "orvix-stop-" + uuid.uuid4().hex[:16]
+    producer = subprocess.Popen([str(_executable(root)), "bridge", "--synthetic",
+                                 "--continuous", "--name", name], cwd=str(root),
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    try:
+        with SharedMemoryReader(name, 5) as reader:
+            deadline = time.monotonic() + 3
+            while reader.header.published_sequence < 5 and time.monotonic() < deadline:
+                time.sleep(0.01)
+            assert reader.header.published_sequence >= 5
+        # Detaching the consumer must not stop Capture (RF-024).
+        time.sleep(0.1)
+        assert producer.poll() is None
+        with SharedMemoryReader(name, 0) as reader:
+            reader.request_stop()
+        output = producer.communicate(timeout=5)[0]
+        assert producer.returncode == 0, output
+        assert "Bridge status: COMPLETED" in output
+    finally:
+        if producer.poll() is None:
+            producer.terminate()
+            producer.wait(timeout=5)

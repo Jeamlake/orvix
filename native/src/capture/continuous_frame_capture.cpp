@@ -38,7 +38,7 @@ CaptureSummary ContinuousFrameCapture::run(
     const std::size_t maximum_empty_reads,
     FrameSink* const sink
 ) {
-    if (requested_frames == 0) {
+    if (requested_frames == 0 && sink == nullptr) {
         throw std::invalid_argument(
             "Continuous capture requires at least one frame."
         );
@@ -46,15 +46,21 @@ CaptureSummary ContinuousFrameCapture::run(
 
     CaptureSummary summary;
     summary.requested_frames = requested_frames;
-    summary.frames.reserve(requested_frames);
+    std::size_t consecutive_empty_reads{};
+    if (sink == nullptr) {
+        summary.frames.reserve(requested_frames);
+    }
 
-    while (summary.captured_frames < requested_frames) {
+    while (requested_frames == 0 || summary.captured_frames < requested_frames) {
+        if (sink != nullptr && sink->stop_requested()) {
+            break;
+        }
         const FrameReadResult frame = reader.read_next();
 
         if (!frame.frame_available) {
             ++summary.empty_reads;
-
-            if (summary.empty_reads > maximum_empty_reads) {
+            ++consecutive_empty_reads;
+            if (consecutive_empty_reads > maximum_empty_reads) {
                 throw DiagnosticError(
                     "ORV-CAP-503",
                     "camera_stream_stalled",
@@ -65,6 +71,7 @@ CaptureSummary ContinuousFrameCapture::run(
 
             continue;
         }
+        consecutive_empty_reads = 0;
 
         const std::size_t byte_count = frame.payload.empty()
             ? frame.byte_count
@@ -100,7 +107,11 @@ CaptureSummary ContinuousFrameCapture::run(
             format.pixel_format,
             byte_count
         };
-        summary.frames.push_back(metadata);
+        // Bridge sessions can run indefinitely: never accumulate metadata
+        // for every frame in the producer. The CLI capture command retains it.
+        if (sink == nullptr) {
+            summary.frames.push_back(metadata);
+        }
 
         if (sink != nullptr) {
             if (frame.payload.empty() && byte_count != 0) {

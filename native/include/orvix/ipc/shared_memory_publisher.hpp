@@ -44,6 +44,9 @@ public:
     void mark_failed() noexcept;
 
     [[nodiscard]]
+    bool stop_requested() const noexcept override;
+
+    [[nodiscard]]
     PublisherStats stats() const noexcept;
 
     [[nodiscard]]

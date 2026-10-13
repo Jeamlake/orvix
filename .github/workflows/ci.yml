@@ -75,6 +75,27 @@ jobs:
       - name: Test
         run: python -m pytest
 
+  desktop:
+    name: Windows desktop lifecycle
+    runs-on: windows-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install desktop test dependencies
+        run: python -m pip install -e ".[dev,desktop]"
+      - name: Configure native engine
+        run: cmake -S . -B build -A x64
+      - name: Build native engine
+        run: cmake --build build --config Release --parallel
+      - name: Test desktop and real bridge lifecycle
+        run: python -m pytest -o addopts="" python/tests/test_desktop.py
+
   python-legacy:
     name: Python 3.8 compatibility
     runs-on: windows-latest

@@ -24,6 +24,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--frames", type=int, default=0)
     parser.add_argument("--attach-timeout", type=float, default=10.0)
     parser.add_argument("--poll-ms", type=float, default=2.0)
+    parser.add_argument("--stall-timeout", type=float, default=5.0)
     parser.add_argument(
         "--headless",
         action="store_true",
@@ -42,12 +43,16 @@ def _consumer_fps(samples: Deque[float]) -> float:
 def run(args: argparse.Namespace) -> int:
     if args.frames < 0 or args.poll_ms < 0:
         raise ValueError("--frames and --poll-ms cannot be negative")
+    if getattr(args, "stall_timeout", 5.0) <= 0:
+        raise ValueError("--stall-timeout must be positive")
 
     displayed = 0
     sequences = SequenceTracker()
     samples: Deque[float] = deque(maxlen=120)
 
     with SharedMemoryReader(args.name, args.attach_timeout) as reader:
+        # Waiting for the mapping is distinct from waiting for live frames.
+        last_frame_at = time.monotonic()
         initial = reader.header
         target_fps = (
             initial.fps_numerator / initial.fps_denominator
@@ -76,6 +81,7 @@ def run(args: argparse.Namespace) -> int:
                 reader.acknowledge(sequences.last_sequence)
                 displayed += 1
                 samples.append(time.monotonic())
+                last_frame_at = time.monotonic()
 
                 if not args.headless:
                     overlay = (
@@ -101,9 +107,6 @@ def run(args: argparse.Namespace) -> int:
                         cv2.LINE_AA,
                     )
                     cv2.imshow("ORVIX Live - RAW", image)
-                    key = cv2.waitKey(1) & 0xFF
-                    if key in (27, ord("q")):
-                        break
 
                 if args.frames and displayed >= args.frames:
                     break
@@ -111,6 +114,13 @@ def run(args: argparse.Namespace) -> int:
             if header.producer_state in (PRODUCER_STOPPED, PRODUCER_FAILED):
                 if frame is None or frame.sequence == sequences.last_sequence:
                     break
+            if not args.headless:
+                # Pump window events even if the producer stops emitting frames.
+                key = cv2.waitKey(1) & 0xFF
+                if key in (27, ord("q")):
+                    break
+            if time.monotonic() - last_frame_at > getattr(args, "stall_timeout", 5.0):
+                raise TimeoutError("Producer stopped delivering frames; consumer detached.")
             if args.poll_ms:
                 time.sleep(args.poll_ms / 1000.0)
 

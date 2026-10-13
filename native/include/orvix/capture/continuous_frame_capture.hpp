@@ -44,6 +44,11 @@ public:
         const FrameMetadata& metadata,
         std::span<const std::byte> payload
     ) = 0;
+
+    // Consumers never stop Capture merely by disconnecting. This is an
+    // explicit lifecycle request made by the owner of a desktop session.
+    [[nodiscard]]
+    virtual bool stop_requested() const noexcept { return false; }
 };
 
 struct CaptureSummary final {

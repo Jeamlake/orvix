@@ -51,9 +51,16 @@ all multibyte offsets are naturally aligned.
 | 96 | 8 | uint64 | Latest consumed sequence |
 | 104 | 8 | uint64 | Overwritten frames |
 | 112 | 8 | uint64 | Producer FPS multiplied by 1000 |
-| 120 | 8 | bytes | Reserved |
+| 120 | 4 | uint32 | Explicit stop request (`0` normal, `1` stop), 0.2.1 extension |
+| 124 | 4 | bytes | Reserved |
 
 Producer states are `0 INITIALIZING`, `1 RUNNING`, `2 STOPPED` and `3 FAILED`.
+
+Since ORVIX 0.2.1, the session owner may write `1` at offset 120 to request a
+clean stop. `bridge --continuous` captures until that request without keeping
+an unbounded metadata list. Detaching the consumer does not write this field
+and leaves Capture running (RF-024). Older producers ignore the extension;
+the remaining IPC v1 layout is unchanged.
 
 ## Per-slot header
 

@@ -65,6 +65,7 @@ inline constexpr std::size_t published_sequence = 88;
 inline constexpr std::size_t consumed_sequence = 96;
 inline constexpr std::size_t overwritten_frames = 104;
 inline constexpr std::size_t producer_fps_x1000 = 112;
+inline constexpr std::size_t stop_request = 120;
 }  // namespace header_offset
 
 namespace slot_offset {

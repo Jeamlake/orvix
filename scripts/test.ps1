@@ -7,4 +7,6 @@ if (-not (Test-Path $Python)) {
 }
 
 ctest --test-dir (Join-Path $Root "build") -C Release --output-on-failure
+if ($LASTEXITCODE -ne 0) { throw "Native tests failed ($LASTEXITCODE)." }
 & $Python -m pytest
+if ($LASTEXITCODE -ne 0) { throw "Python tests failed ($LASTEXITCODE)." }
