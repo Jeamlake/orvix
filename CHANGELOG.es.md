@@ -2,7 +2,15 @@
 
 [English](CHANGELOG.md) | [Español](CHANGELOG.es.md)
 
-## [Sin publicar]
+## 1.0.0
+
+- Modos RAW, grises, Canny y movimiento intercambiables durante la captura.
+- Historial SQLite con sesiones, métricas y diagnósticos. Gráficos de FPS,
+  latencia, detecciones y ocupación.
+- Ajustes de formato solicitado, slots, muestreo y sensibilidad.
+- Benchmark reproducible y distribución portátil Windows x64.
+
+## 0.2.1
 
 ### Agregado
 

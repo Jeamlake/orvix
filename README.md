@@ -1,17 +1,18 @@
 # ORVIX
 
-## Desktop application — Delivery 2 (0.2.1)
+## Desktop application · ORVIX 1.0
 
-The RAW desktop UI now controls the native C++ engine: camera selection,
-synthetic demo, explicit stop, aspect-fit/zoom, live telemetry and diagnostics.
-It does not implement Delivery 3 filters, detection or SQLite history.
-Install the `desktop` extra and run `python -m orvix.ui.desktop` after building
-the native engine. The Windows x64 installer is in
-`entregables/Avance2_ORVIX_2026-10-11/Aplicacion`.
-[Validation and packaging notes](docs/en/evidence/delivery-02/desktop-validation.md).
-Rebuild the installer with `scripts/package-desktop.ps1`; executable binaries
-are excluded from Git. Academic documents and their implementation addendum
-are versioned under `entregables`.
+ORVIX captures video in C++, publishes frames through shared memory and
+switches between RAW, grayscale, edges and motion detection live in Python/Qt.
+The desktop app includes live metrics, SQLite history, session charts,
+settings and diagnostics.
+
+In the Windows x64 distribution, extract the entire
+`Aplicacion-Windows-x64` folder and run `ORVIX.exe`. Start with the synthetic
+demo. See the [ORVIX 1.0 guide](docs/en/release-1.0.md) for source builds,
+reproducible benchmarks and packaging.
+
+The earlier academic documents are archived under `entregables`.
 
 [English](README.md) | [Español](README.es.md)
 
@@ -158,7 +159,7 @@ Frames are ephemeral by default and are not persisted automatically.
 
 ## Current milestone
 
-**Delivery 2 — ORVIX Bridge and RAW visualization (functional scope complete)**
+**Version 1.0.0 · Capture, Bridge, Vision and Insight**
 
 ## License
 

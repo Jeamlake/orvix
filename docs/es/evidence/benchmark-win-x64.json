@@ -1,0 +1,59 @@
+{
+  "orvix": "1.0.0",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "python": "3.13.16",
+  "opencv": "4.14.0",
+  "numpy": "2.5.4",
+  "source": "synthetic NV12 1280x720 30 FPS",
+  "frames_per_run": 180,
+  "modes": [
+    {
+      "frames": "170",
+      "first_to_last": "180",
+      "skipped": "0",
+      "producer_overwrites": "8",
+      "buffer_utilization": "0.0%",
+      "viewer_fps": "30.05",
+      "mode": "raw",
+      "capture_fps": "30.00",
+      "mean_processing_ms": "1.461",
+      "detections": "0"
+    },
+    {
+      "frames": "168",
+      "first_to_last": "180",
+      "skipped": "3",
+      "producer_overwrites": "8",
+      "buffer_utilization": "0.0%",
+      "viewer_fps": "29.25",
+      "mode": "gray",
+      "capture_fps": "30.00",
+      "mean_processing_ms": "2.902",
+      "detections": "0"
+    },
+    {
+      "frames": "161",
+      "first_to_last": "180",
+      "skipped": "8",
+      "producer_overwrites": "13",
+      "buffer_utilization": "0.0%",
+      "viewer_fps": "27.42",
+      "mode": "edges",
+      "capture_fps": "30.00",
+      "mean_processing_ms": "8.418",
+      "detections": "0"
+    },
+    {
+      "frames": "160",
+      "first_to_last": "180",
+      "skipped": "0",
+      "producer_overwrites": "18",
+      "buffer_utilization": "0.0%",
+      "viewer_fps": "29.99",
+      "mode": "motion",
+      "capture_fps": "30.00",
+      "mean_processing_ms": "6.844",
+      "detections": "6"
+    }
+  ]
+}

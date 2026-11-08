@@ -1,5 +1,7 @@
 # ORVIX Requirements Traceability Matrix
 
+See [ORVIX 1.0 validation](../release-1.0.md) for the scope of the new checks.
+
 | Requirement | Component | Delivery | Test | Status |
 |---|---|---:|---|---|
 | RF-001 | Capture | 1 | TC-CAP-001 | Verified |
@@ -12,18 +14,18 @@
 | RF-008 | Vision | 2 | TC-IPC-006 | Verified |
 | RF-009 | Vision | 2 | TC-VIS-001 | Verified |
 | RF-010 | Vision | 2 | TC-VIS-001 | Verified |
-| RF-011 | Vision | 3 | Pending | Planned |
-| RF-012 | Vision | 3 | Pending | Planned |
-| RF-013 | Vision | 3 | TC-VIS-004 | Planned |
-| RF-014 | Vision | 3 | Pending | Planned |
+| RF-011 | Vision | 3 | `test_vision_pipeline.py` | Verified in 1.0 |
+| RF-012 | Vision | 3 | `test_vision_pipeline.py` | Verified in 1.0 |
+| RF-013 | Vision | 3 | `test_vision_pipeline.py` | Verified in 1.0 |
+| RF-014 | Vision | 3 | `test_desktop.py` (integration) | Verified in 1.0 |
 | RF-015 | Insight | 1 | TC-MET-001 | Verified |
-| RF-016 | Insight | 3 | Pending | Planned |
+| RF-016 | Insight | 3 | `benchmark.py` | Verified in 1.0 |
 | RF-017 | Bridge | 2 | TC-IPC-008 | Verified |
-| RF-018 | Insight | 3 | Pending | Planned |
-| RF-019 | Insight | 3 | TC-MET-004 | Planned |
+| RF-018 | Insight | 3 | `test_desktop.py` (integration) | Verified in 1.0 |
+| RF-019 | Insight | 3 | `test_vision_pipeline.py` / `benchmark.py` | Verified in 1.0 |
 | RF-020 | Insight | 2 | TC-MET-005 | Verified |
-| RF-021 | Insight | 3 | TC-DB-001 | Planned |
-| RF-022 | Insight | 3 | Pending | Planned |
+| RF-021 | Insight | 3 | `test_desktop.py` (integration) | Verified in 1.0 |
+| RF-022 | Insight | 3 | `test_desktop.py` (integration) | Verified in 1.0 |
 | RF-023 | Capture | 1 | TC-CAP-023 | Verified |
 | RF-024 | Capture / Vision | 2 | TC-IPC-005 | Verified |
 | RF-025 | Test Infrastructure | 2 | TC-SYN-001 | Verified |

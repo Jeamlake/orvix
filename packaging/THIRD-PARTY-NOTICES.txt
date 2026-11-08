@@ -1,4 +1,4 @@
-ORVIX Avance 2 - 0.2.1
+ORVIX 1.0.0
 ORVIX source: https://github.com/Jeamlake/orvix (MIT)
 Local modifications and packaging recipes: supplied in the project checkout.
 
@@ -14,7 +14,7 @@ https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.8.3-src/
 https://code.qt.io/cgit/qt/qtbase.git/?h=v6.8.3
 https://code.qt.io/cgit/pyside/pyside-setup.git/?h=v6.8.3
 
-Python 3.11 (PSF license), NumPy (BSD), OpenCV (Apache 2.0),
+Python (PSF license), NumPy (BSD), OpenCV (Apache 2.0),
 OpenBLAS (BSD), PyInstaller (GPL with bootloader exception).
 The license files shipped by these packages are included by the packaging
 script from the installed distribution metadata. PyInstaller is a build tool;

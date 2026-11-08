@@ -1,4 +1,4 @@
 import orvix
 
 def test_version():
-    assert orvix.__version__ == "0.2.1"
+    assert orvix.__version__ == "1.0.0"

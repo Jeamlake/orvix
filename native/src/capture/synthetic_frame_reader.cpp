@@ -74,10 +74,18 @@ FrameReadResult SyntheticFrameReader::read_next() {
         generated_frames_ % format_.width
     );
 
+    // A bright block changes position twice a second at the default FPS.
+    // It gives the motion mode a reproducible, visible target.
+    const std::uint32_t block_size = std::min(format_.width, format_.height) / 5;
+    const std::uint32_t block_x = (format_.width - block_size) *
+        static_cast<std::uint32_t>((generated_frames_ / 15) % 5) / 4;
+    const std::uint32_t block_y = (format_.height - block_size) / 2;
     for (std::uint32_t row = 0; row < format_.height; ++row) {
         for (std::uint32_t column = 0; column < format_.width; ++column) {
             const std::uint32_t value =
-                32U + ((column + phase + row / 4U) % 192U);
+                row >= block_y && row < block_y + block_size &&
+                column >= block_x && column < block_x + block_size
+                    ? 235U : 32U + ((column + phase + row / 4U) % 192U);
             payload[static_cast<std::size_t>(row) * format_.width + column] =
                 static_cast<std::byte>(value);
         }

@@ -1,3 +1,5 @@
+# Ejemplo histórico de configuración. En ORVIX 1.0 se usa Ajustes en la app
+# o los argumentos de orvix-capture bridge y orvix-viewer en la terminal.
 [capture]
 device_index = 0
 width = 1280

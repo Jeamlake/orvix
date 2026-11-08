@@ -33,7 +33,7 @@ using capture::DiagnosticError;
 using capture::VideoFormat;
 using observability::Logger;
 
-constexpr std::string_view kVersion = "0.2.1";
+constexpr std::string_view kVersion = "1.0.0";
 constexpr std::size_t kDefaultCaptureFrames = 120;
 constexpr std::size_t kDefaultBridgeFrames = 900;
 
@@ -44,6 +44,8 @@ struct BridgeOptions final {
     bool has_index{false};
     std::size_t index{};
     std::size_t frames{kDefaultBridgeFrames};
+    capture::VideoFormatTarget target;
+    std::uint32_t slots{3};
     std::string name{ipc::kDefaultSharedMemoryName};
 };
 
@@ -64,6 +66,7 @@ void print_usage() {
         << "  orvix-capture capture --index <N>\n"
         << "  orvix-capture bridge --index <N> [--frames <N>] [--name <NAME>]\n"
         << "  orvix-capture bridge --synthetic [--frames <N>] [--name <NAME>]\n"
+        << "  Bridge options: --width <even> --height <even> --fps <1..120> --slots <2..8>\n"
         << "  Add --continuous to run until an explicit IPC stop request.\n"
         << "  orvix-capture --help\n";
 }
@@ -119,7 +122,8 @@ BridgeOptions parse_bridge_options(const int argc, char* argv[]) {
         if (
             argument != "--index" &&
             argument != "--frames" &&
-            argument != "--name"
+            argument != "--name" && argument != "--width" &&
+            argument != "--height" && argument != "--fps" && argument != "--slots"
         ) {
             throw std::invalid_argument(
                 "Unknown bridge argument: " + std::string(argument)
@@ -146,8 +150,30 @@ BridgeOptions parse_bridge_options(const int argc, char* argv[]) {
             options.has_frames = true;
             options.frames = parse_positive_size(value, "Frame count");
         }
-        else {
+        else if (argument == "--name") {
             options.name = value;
+        }
+        else {
+            const auto parsed = parse_positive_size(value, argument);
+            if (argument == "--width" || argument == "--height") {
+                if (parsed < 2 || parsed > 1920 || parsed % 2 != 0) {
+                    throw std::invalid_argument("Frame dimensions must be even and between 2 and 1920.");
+                }
+                auto& dimension = argument == "--width" ? options.target.width : options.target.height;
+                dimension = static_cast<std::uint32_t>(parsed);
+            }
+            else if (argument == "--fps") {
+                if (parsed > 120) {
+                    throw std::invalid_argument("FPS must be between 1 and 120.");
+                }
+                options.target.frames_per_second = static_cast<std::uint32_t>(parsed);
+            }
+            else {
+                if (parsed < 2 || parsed > 8) {
+                    throw std::invalid_argument("Slot count must be between 2 and 8.");
+                }
+                options.slots = static_cast<std::uint32_t>(parsed);
+            }
         }
     }
     if (options.continuous && options.has_frames) {
@@ -236,9 +262,9 @@ std::unique_ptr<Camera> open_camera(
     }
 }
 
-VideoFormat configure_camera(Camera& camera) {
+VideoFormat configure_camera(Camera& camera, const capture::VideoFormatTarget& target = {}) {
     try {
-        return camera.configure(capture::VideoFormatTarget{});
+        return camera.configure(target);
     }
     catch (const DiagnosticError&) {
         throw;
@@ -317,7 +343,7 @@ CaptureSummary publish_reader(
     Logger& logger,
     const std::string_view source
 ) {
-    ipc::SharedMemoryPublisher publisher(options.name, format);
+    ipc::SharedMemoryPublisher publisher(options.name, format, options.slots);
     print_bridge_started(options, format, source);
     logger.info(
         "ORV-IPC-200",
@@ -363,7 +389,9 @@ CaptureSummary publish_reader(
 
 int run_bridge(Logger& logger, const BridgeOptions& options) {
     if (options.synthetic) {
-        capture::SyntheticFrameReader reader;
+        capture::SyntheticFrameReader reader(
+            options.target.width, options.target.height, options.target.frames_per_second
+        );
         static_cast<void>(publish_reader(
             reader,
             options,
@@ -378,8 +406,8 @@ int run_bridge(Logger& logger, const BridgeOptions& options) {
     const auto& selected = select_device(devices, options.index);
     auto camera = open_camera(selected);
     log_camera_opened(logger, selected);
-    const auto configured = configure_camera(*camera);
-    ipc::SharedMemoryPublisher publisher(options.name, configured);
+    const auto configured = configure_camera(*camera, options.target);
+    ipc::SharedMemoryPublisher publisher(options.name, configured, options.slots);
     print_bridge_started(
         options,
         configured,

@@ -94,7 +94,7 @@ class Preview(QWidget):
         super().__init__(parent)
         self.setMinimumSize(300, 210)
         self.setFocusPolicy(Qt.StrongFocus)
-        self.setAccessibleName("Vista RAW. Rueda para ampliar; arrastra para mover; doble clic para ajustar.")
+        self.setAccessibleName("Vista en directo. Rueda para ampliar; arrastra para mover; doble clic para ajustar.")
         self.image = QImage()
         self.zoom = 1.0
         self.offset = QPointF()

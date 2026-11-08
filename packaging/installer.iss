@@ -11,7 +11,7 @@
 [Setup]
 AppId={{F7759A56-FA49-4807-9B3F-2A797128D711}
 AppName=ORVIX
-AppVersion=0.2.1
+AppVersion=1.0.0
 AppPublisher=Equipo ORVIX
 AppPublisherURL=https://github.com/Jeamlake/orvix
 DefaultDirName={localappdata}\Programs\ORVIX
@@ -22,7 +22,7 @@ MinVersion=10.0
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir={#OutputPath}
-OutputBaseFilename=ORVIX-Avance2-Setup-0.2.1
+OutputBaseFilename=ORVIX-Setup-1.0.0
 SetupIconFile={#IconPath}
 UninstallDisplayIcon={app}\ORVIX.exe
 Compression=lzma2
@@ -42,7 +42,7 @@ Name: "desktopicon"; Description: "Crear un acceso directo en el escritorio"; Gr
 Source: "{#AppSource}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\ORVIX · Avance 2"; Filename: "{app}\ORVIX.exe"; WorkingDir: "{app}"
+Name: "{group}\ORVIX"; Filename: "{app}\ORVIX.exe"; WorkingDir: "{app}"
 Name: "{autodesktop}\ORVIX"; Filename: "{app}\ORVIX.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Run]
