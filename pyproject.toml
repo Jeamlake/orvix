@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "orvix"
-version = "0.2.1"
+version = "1.0.0"
 description = "Optical Real-time Video Ingestion eXchange"
 requires-python = ">=3.8,<3.14"
 license = {text = "MIT"}

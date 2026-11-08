@@ -14,6 +14,7 @@ from orvix.ipc import DEFAULT_SHARED_MEMORY_NAME, SharedMemoryReader
 from orvix.ipc.protocol import PRODUCER_FAILED, PRODUCER_STOPPED
 from orvix.metrics import SequenceTracker
 from orvix.vision import FrameDecodeError, decode_bgr
+from orvix.vision.pipeline import MODES, VisionPipeline
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -22,6 +23,7 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--name", default=DEFAULT_SHARED_MEMORY_NAME)
     parser.add_argument("--frames", type=int, default=0)
+    parser.add_argument("--mode", choices=MODES, default="raw")
     parser.add_argument("--attach-timeout", type=float, default=10.0)
     parser.add_argument("--poll-ms", type=float, default=2.0)
     parser.add_argument("--stall-timeout", type=float, default=5.0)
@@ -47,6 +49,9 @@ def run(args: argparse.Namespace) -> int:
         raise ValueError("--stall-timeout must be positive")
 
     displayed = 0
+    mode = getattr(args, "mode", "raw")
+    pipeline = VisionPipeline()
+    latency_total = 0.0
     sequences = SequenceTracker()
     samples: Deque[float] = deque(maxlen=120)
 
@@ -77,7 +82,9 @@ def run(args: argparse.Namespace) -> int:
             frame = reader.read_latest()
             if frame is not None and frame.sequence != sequences.last_sequence:
                 sequences.observe(frame.sequence)
-                image = decode_bgr(frame)
+                started = time.perf_counter()
+                image = pipeline.process(decode_bgr(frame), mode)
+                latency_total += (time.perf_counter() - started) * 1000
                 reader.acknowledge(sequences.last_sequence)
                 displayed += 1
                 samples.append(time.monotonic())
@@ -106,7 +113,7 @@ def run(args: argparse.Namespace) -> int:
                         2,
                         cv2.LINE_AA,
                     )
-                    cv2.imshow("ORVIX Live - RAW", image)
+                    cv2.imshow("ORVIX Live - " + mode.upper(), image)
 
                 if args.frames and displayed >= args.frames:
                     break
@@ -130,13 +137,18 @@ def run(args: argparse.Namespace) -> int:
         cv2.destroyAllWindows()
     print(
         "Viewer status: COMPLETED frames={} first_to_last={} skipped={} "
-        "producer_overwrites={} buffer_utilization={:.1f}% viewer_fps={:.2f}".format(
+        "producer_overwrites={} buffer_utilization={:.1f}% viewer_fps={:.2f} "
+        "mode={} capture_fps={:.2f} mean_processing_ms={:.3f} detections={}".format(
             displayed,
             sequences.last_sequence,
             sequences.skipped_frames,
             final.overwritten_frames,
             final.buffer_utilization * 100.0,
             _consumer_fps(samples),
+            mode,
+            final.producer_fps,
+            latency_total / max(1, displayed),
+            pipeline.total_detections,
         )
     )
     return 0 if displayed > 0 else 3

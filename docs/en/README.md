@@ -2,6 +2,7 @@
 
 [English](README.md) | [Español](../es/README.md)
 
+- [Final delivery · ORVIX 1.0](release-1.0.md)
 - [Architecture](architecture/overview.md)
 - [Platform compatibility](platform/compatibility.md)
 - [Software requirements](requirements/software-requirements.md)

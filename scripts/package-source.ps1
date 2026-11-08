@@ -1,12 +1,13 @@
 $ErrorActionPreference = 'Stop'
 $OrvixRoot = (Split-Path $PSScriptRoot -Parent)
-$OrvixArchivePath = Join-Path $OrvixRoot 'entregables/Avance2_ORVIX_2026-10-11/Aplicacion/ORVIX-Avance2-Codigo-0.2.1.zip'
+$OrvixArchivePath = Join-Path $OrvixRoot 'out/release/ORVIX-Codigo-1.0.0.zip'
+New-Item -ItemType Directory -Path (Split-Path $OrvixArchivePath -Parent) -Force | Out-Null
 $OrvixTemporaryArchivePath = Join-Path (Split-Path $OrvixArchivePath -Parent) ('.orvix-source-' + [Guid]::NewGuid().ToString('N') + '.zip')
 $OrvixCandidates = & git -C $OrvixRoot ls-files --cached --others --exclude-standard
 if ($LASTEXITCODE -ne 0) { throw 'Unable to enumerate repository source.' }
 # Explicit scope: no .git, environments, logs, databases or user attachments.
 $OrvixSourceFiles = $OrvixCandidates | Where-Object {
-    $_ -match '^(native/|python/src/|python/tests/|scripts/|packaging/|docs/(es|en)/(requirements/|protocol/|evidence/delivery-02/)|CMakeLists\.txt$|pyproject\.toml$|LICENSE$|README(\.es)?\.md$|\.gitignore$)'
+    $_ -match '^(native/|python/src/|python/tests/|scripts/|packaging/|docs/|config/orvix\.example\.toml$|\.github/workflows/|CMakeLists\.txt$|pyproject\.toml$|LICENSE$|README(\.es)?\.md$|\.gitignore$)'
 }
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem

@@ -19,6 +19,13 @@ from orvix.ipc import SharedMemoryReader
 from orvix.ipc.protocol import PRODUCER_FAILED, PRODUCER_STOPPED
 from orvix.metrics import SequenceTracker
 from orvix.vision import decode_bgr
+from orvix.vision.pipeline import VisionPipeline
+
+PROFILES = {
+    "480p30": (640, 480, 30),
+    "720p30": (1280, 720, 30),
+    "1080p30": (1920, 1080, 30),
+}
 
 
 @dataclass(frozen=True)
@@ -70,12 +77,16 @@ class FrameWorker(QThread):
     connected = Signal(object)
     failed = Signal(str)
 
-    def __init__(self, name, mailbox, parent=None, attach_timeout=8.0, stall_timeout=5.0):
+    def __init__(self, name, mailbox, sequences, pipeline, mode, parent=None, attach_timeout=8.0, stall_timeout=5.0):
         super().__init__(parent)
         self.name = name
         self.mailbox = mailbox
         self.attach_timeout = attach_timeout
         self.stall_timeout = stall_timeout
+        self.sequences = sequences
+        self.pipeline = pipeline
+        # A single string is exchanged with the UI. The worker owns pipeline state.
+        self.mode = mode
 
     def run(self):
         reader = None
@@ -93,7 +104,8 @@ class FrameWorker(QThread):
                 return
             initial = reader.header
             self.connected.emit(initial)
-            sequences = SequenceTracker()
+            sequences = self.sequences
+            self.pipeline.reset_reference()
             samples = deque(maxlen=90)
             last_frame_at = time.monotonic()
             while not self.isInterruptionRequested():
@@ -102,7 +114,10 @@ class FrameWorker(QThread):
                 if header.published_sequence > sequences.last_sequence:
                     frame = reader.read_latest()
                     if frame is not None and frame.sequence > sequences.last_sequence:
-                        image = decode_bgr(frame)
+                        mode = self.mode
+                        started = time.perf_counter()
+                        image = self.pipeline.process(decode_bgr(frame), mode)
+                        latency = (time.perf_counter() - started) * 1000
                         sequences.observe(frame.sequence)
                         occupancy = header.buffer_utilization * 100.0
                         reader.acknowledge(frame.sequence)
@@ -117,6 +132,9 @@ class FrameWorker(QThread):
                             "capture_fps": header.producer_fps, "consumer_fps": fps,
                             "skipped": sequences.skipped_frames,
                             "overwrites": header.overwritten_frames, "buffer": occupancy,
+                            "mode": mode, "latency_ms": latency, "slots": header.slot_count,
+                            "detections_min": len(self.pipeline.detection_times),
+                            "detections_total": self.pipeline.total_detections,
                         })
                         last_frame_at = now
                 if header.producer_state in (PRODUCER_STOPPED, PRODUCER_FAILED):
@@ -150,6 +168,11 @@ class CaptureController(QObject):
         self.mailbox = LatestFrame()
         self.worker = None
         self.name = ""
+        self.mode = "raw"
+        self.profile = "720p30"
+        self.slots = 3
+        self.motion_area = 0.25
+        self.forced_stop = False
         self._stopping = False
         self._fault = False
         self._output_tail = ""
@@ -185,7 +208,7 @@ class CaptureController(QObject):
         self.state_changed.emit(state, text)
 
     def refresh_devices(self):
-        if self.active or self.enumerator.state() != QProcess.NotRunning:
+        if self._closing or self.active or self.enumerator.state() != QProcess.NotRunning:
             return
         self.enumerator.start(str(self.engine), ["devices"])
         self.enumeration_timer.start(5000)
@@ -215,23 +238,33 @@ class CaptureController(QObject):
         self.diagnostics.emit("warning", "La búsqueda de cámaras tardó demasiado. Revisa el dispositivo y vuelve a buscar.")
 
     def start(self, index=None):
-        if self.active or self.enumerator.state() != QProcess.NotRunning:
+        if self._closing or self.active or self.enumerator.state() != QProcess.NotRunning:
             return
         self._stopping = self._fault = False
+        self.forced_stop = False
+        self.sequences = SequenceTracker()
+        self.pipeline = VisionPipeline(self.motion_area)
         self.mailbox.take()
         self._output_tail = ""
         # Native IPC names are limited to 30 characters for POSIX portability.
         self.name = "orvix-ui-" + uuid.uuid4().hex[:16]
         args = ["bridge", "--continuous", "--name", self.name]
+        width, height, fps = PROFILES[self.profile]
+        args += ["--width", str(width), "--height", str(height), "--fps", str(fps), "--slots", str(self.slots)]
         args += ["--synthetic"] if index is None else ["--index", str(index)]
         self._state("starting", "Conectando con el motor…")
         self.diagnostics.emit("info", "Nueva captura · " + ("demo sintética" if index is None else "cámara {}".format(index)))
         self.process.start(str(self.engine), args)
 
+    def set_mode(self, mode):
+        self.mode = mode
+        if self.worker is not None:
+            self.worker.mode = mode
+
     def _start_reader(self):
         if self._stopping:
             return
-        self.worker = FrameWorker(self.name, self.mailbox, self)
+        self.worker = FrameWorker(self.name, self.mailbox, self.sequences, self.pipeline, self.mode, self)
         self.worker.connected.connect(self._connected)
         self.worker.failed.connect(self._reader_failed)
         self.worker.finished.connect(self._reader_finished)
@@ -248,7 +281,7 @@ class CaptureController(QObject):
             return
         self.connected.emit(header)
         self._state("running", "Captura en directo")
-        self.diagnostics.emit("success", "Bridge conectado · PID {} · {}×{} · {} · RAW".format(
+        self.diagnostics.emit("success", "Bridge conectado · PID {} · {}×{} · {}".format(
             header.producer_pid, header.width, header.height, header.pixel_format))
 
     def _reader_failed(self, message):
@@ -310,6 +343,7 @@ class CaptureController(QObject):
 
     def _force_stop(self):
         if self.process.state() != QProcess.NotRunning:
+            self.forced_stop = True
             self.diagnostics.emit("warning", "El motor no respondió a la parada. Se cierra únicamente el proceso de esta captura.")
             self.process.terminate()
             self.kill_timer.start(500)

@@ -4,7 +4,14 @@
 
 [English](CHANGELOG.md) | [Español](CHANGELOG.es.md)
 
-## [Unreleased]
+## 1.0.0
+
+- Live RAW, grayscale, Canny and motion modes.
+- SQLite session history and charts for FPS, latency, detections and buffer use.
+- Capture profile, slot count, sample interval and motion sensitivity settings.
+- Reproducible benchmark and Windows x64 portable distribution.
+
+## 0.2.1
 
 ### Added
 

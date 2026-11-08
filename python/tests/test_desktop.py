@@ -6,9 +6,10 @@ import pytest
 pytest.importorskip("PySide6")
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtCore import QProcess
+from PySide6.QtCore import QProcess, QSettings
 from PySide6.QtWidgets import QApplication
 
+from orvix.metrics.history import History
 from orvix.ui.capture_controller import CaptureController, LatestFrame, find_engine, parse_devices
 from orvix.ui.desktop import MainWindow
 
@@ -68,7 +69,7 @@ def test_widget_layout_and_zoom(qt_app, tmp_path):
         assert window.start.isEnabled()
         assert not window.stop.isEnabled()
         assert window.preview.image.isNull()
-        assert window.pages.count() == 3
+        assert window.pages.count() == 5
         window.preview.set_zoom(20)
         assert window.preview.zoom == 5
         window.preview.fit()
@@ -158,3 +159,42 @@ def test_desktop_real_bridge_start_stop_restart_and_crash(qt_app, tmp_path):
         wait_until(qt_app, lambda: not window.controller.active)
         wait_until(qt_app, lambda: window.controller.enumerator.state() == QProcess.NotRunning)
         window.close()
+
+@pytest.mark.integration
+def test_live_modes_and_history_survive_reopen(qt_app, tmp_path, monkeypatch):
+    monkeypatch.setattr("orvix.ui.desktop.QSettings", lambda: QSettings(str(tmp_path / "app.ini"), QSettings.IniFormat))
+    window = MainWindow(find_engine(), tmp_path)
+    try:
+        window.profile.setCurrentIndex(window.profile.findData("480p30"))
+        window.slots.setValue(4)
+        window._start()
+        wait_until(qt_app, lambda: window._last_metrics is not None)
+        before = window._last_metrics["sequence"]
+        pid = window.controller.process.processId()
+        assert (window._last_metrics["width"], window._last_metrics["height"]) == (640, 480)
+        assert window._last_metrics["slots"] == 4
+        for mode in ("gray", "edges", "motion"):
+            window.mode.setCurrentIndex(window.mode.findData(mode))
+            wait_until(qt_app, lambda: window._last_metrics["mode"] == mode)
+            assert window._last_metrics["sequence"] > before
+            assert window.controller.process.processId() == pid
+            assert window._last_metrics["latency_ms"] > 0
+        window._stop()
+        wait_until(qt_app, lambda: not window.controller.active)
+        window._navigate(1)
+        assert window.history_page.sessions.count() == 1
+        assert "Finalizada" in window.history_page.details.text()
+    finally:
+        window.controller.shutdown()
+        wait_until(qt_app, lambda: not window.controller.active)
+        wait_until(qt_app, lambda: window.controller.enumerator.state() == QProcess.NotRunning)
+        window.close()
+
+    history = History(tmp_path / "telemetry.sqlite3")
+    try:
+        session, = history.sessions()
+        assert (session["state"], session["profile"], session["width"]) == ("stopped", "480p30", 640)
+        assert history.samples(session["session_id"])[-1]["mode"] == "motion"
+        assert any("Movimiento" in event["message"] for event in history.events(session["session_id"]))
+    finally:
+        history.close()

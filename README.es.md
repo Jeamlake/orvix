@@ -1,22 +1,19 @@
 # ORVIX
 
-## Aplicación de escritorio — Avance 2 (0.2.1)
+## Aplicación de escritorio · ORVIX 1.0
 
-Interfaz real RAW conectada al motor C++, con selección de cámara, demo,
-parada limpia, zoom y diagnóstico. No incluye filtros ni histórico SQLite.
-Para ejecutar desde el código:
+ORVIX captura video con C++, lo publica por memoria compartida y permite
+cambiar entre RAW, grises, bordes y movimiento desde Python/Qt durante la
+captura. La aplicación incluye métricas en directo, historial SQLite, gráficos
+de sesiones, ajustes y diagnóstico.
 
-```powershell
-./.venv/Scripts/python.exe -m pip install -e '.[desktop]'
-./scripts/build.ps1
-./.venv/Scripts/python.exe -m orvix.ui.desktop
-```
+En la distribución para Windows x64, extrae la carpeta completa
+`Aplicacion-Windows-x64` y ejecuta `ORVIX.exe`. Puedes empezar con
+**Demo sintética**. Para compilar, reproducir el benchmark o empaquetar
+el proyecto, consulta la [guía de ORVIX 1.0](docs/es/release-1.0.md).
 
-El instalador Windows x64 está en `entregables/Avance2_ORVIX_2026-10-11/Aplicacion`.
-[Validación, alcance y empaquetado](docs/es/evidence/delivery-02/desktop-validation.md).
-Para regenerar el instalador usa `scripts/package-desktop.ps1`; los binarios
-están excluidos de Git. Los documentos académicos y su anexo de implementación
-se versionan en `entregables`.
+Los documentos del Avance 2 se conservan como registro académico en
+`entregables`. La versión final y sus pruebas se describen en la guía.
 
 [English](README.md) | [Español](README.es.md)
 
@@ -180,7 +177,7 @@ automáticamente.
 
 ## Hito actual
 
-**Entrega 2 — ORVIX Bridge y visualización RAW (alcance funcional completo)**
+**Versión 1.0.0 · Capture, Bridge, Vision e Insight**
 
 ## Licencia
 
