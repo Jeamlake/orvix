@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 
 case "$(uname -s)" in
     MINGW*|MSYS*|CYGWIN*)
@@ -13,7 +13,7 @@ case "$(uname -s)" in
 esac
 
 if [ ! -f "$PYTHON" ]; then
-    printf 'Run scripts/setup.sh first.\n' >&2
+    printf 'Run tools/scripts/setup.sh first.\n' >&2
     exit 1
 fi
 

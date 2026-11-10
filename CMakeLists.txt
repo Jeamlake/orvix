@@ -39,4 +39,4 @@ if(ORVIX_BUILD_TESTS)
     enable_testing()
 endif()
 
-add_subdirectory(native)
+add_subdirectory(src/native native)

@@ -31,16 +31,16 @@ dev = [
 ]
 
 [tool.setuptools]
-package-dir = {"" = "python/src"}
+package-dir = {"" = "src/python/src"}
 
 [tool.setuptools.packages.find]
-where = ["python/src"]
+where = ["src/python/src"]
 
 [tool.setuptools.package-data]
 "orvix.ui" = ["assets/*.svg"]
 
 [tool.pytest.ini_options]
-testpaths = ["python/tests"]
+testpaths = ["src/python/tests"]
 addopts = "-ra -m 'not integration'"
 markers = [
     "integration: exercises the native C++ producer and Python consumer together"

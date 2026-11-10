@@ -8,11 +8,11 @@ from PySide6.QtCore import QSize
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 
-root = Path(__file__).resolve().parents[1]
+root = Path(__file__).resolve().parents[2]
 output = root / "out/desktop-package"
 output.mkdir(parents=True, exist_ok=True)
 app = QApplication([])
-icon = QIcon(str(root / "python/src/orvix/ui/assets/orvix.svg"))
+icon = QIcon(str(root / "src/python/src/orvix/ui/assets/orvix.svg"))
 assert icon.pixmap(QSize(256, 256)).save(str(output / "orvix.ico"), "ICO")
 python_license = Path(sys.base_prefix) / "LICENSE.txt"
 if python_license.is_file():

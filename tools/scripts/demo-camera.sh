@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -u
 
-ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
 INDEX=${1:-0}
 FRAMES=${2:-900}
 NAME="orvix-camera-v1"
@@ -18,12 +18,12 @@ case "$(uname -s)" in
 esac
 
 if [ ! -f "$CAPTURE" ]; then
-    printf 'ORVIX is not built. Run ./scripts/build.sh first.\n' >&2
+    printf 'ORVIX is not built. Run ./tools/scripts/build.sh first.\n' >&2
     exit 1
 fi
 
 if [ ! -f "$PYTHON" ]; then
-    printf 'The Python environment is missing. Run ./scripts/setup.sh first.\n' >&2
+    printf 'The Python environment is missing. Run ./tools/scripts/setup.sh first.\n' >&2
     exit 1
 fi
 

@@ -40,7 +40,8 @@ Desktop.ini
 .env
 .env.*
 config/orvix.toml
-!config/orvix.example.toml
+docs/examples/orvix.toml
+!docs/examples/orvix.example.toml
 
 *_audit_*.txt
 *_validation_*.txt

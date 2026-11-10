@@ -1,15 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
 from pathlib import Path
-root = Path(SPECPATH).parent
-licenses = list((root / "packaging/licenses").glob("*.txt"))
+root = Path(SPECPATH).parents[1]
+licenses = list((root / "tools/packaging/licenses").glob("*.txt"))
 a = Analysis(
-    [str(root / "scripts/desktop_entry.py")],
-    pathex=[str(root / "python/src")],
+    [str(root / "tools/scripts/desktop_entry.py")],
+    pathex=[str(root / "src/python/src")],
     binaries=[(str(root / "build/native/Release/orvix-capture.exe"), "native")],
-    datas=[(str(root / "python/src/orvix/ui/assets"), "orvix/ui/assets"),
+    datas=[(str(root / "src/python/src/orvix/ui/assets"), "orvix/ui/assets"),
            (str(root / "out/desktop-package/licenses"), "licenses/Packages"),
            (str(root / "LICENSE"), "licenses/ORVIX"),
-           (str(root / "packaging/THIRD-PARTY-NOTICES.txt"), "licenses")]
+           (str(root / "tools/packaging/THIRD-PARTY-NOTICES.txt"), "licenses")]
           + [(str(p), "licenses/Qt") for p in licenses],
     hiddenimports=[],
     excludes=["tkinter", "matplotlib", "pytest", "PySide6.QtQml", "PySide6.QtQuick",

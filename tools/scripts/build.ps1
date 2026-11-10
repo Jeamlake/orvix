@@ -1,5 +1,5 @@
 $ErrorActionPreference = "Stop"
-$Root = Split-Path $PSScriptRoot -Parent
+$Root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $Build = Join-Path $Root "build"
 
 cmake -S $Root -B $Build -A x64

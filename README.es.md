@@ -14,8 +14,8 @@ el proyecto, consulta la [guía de ORVIX 1.0](docs/es/release-1.0.md).
 
 El [informe, la presentación y el ZIP del Avance 2](https://github.com/Jeamlake/orvix/tree/8e88e67e717c72a161c509cb90a50161f63f7f48/entregables/Avance2_ORVIX_2026-10-11) y
 [sus fuentes y mockups](https://github.com/Jeamlake/orvix/tree/8e88e67e717c72a161c509cb90a50161f63f7f48/docs/es/academic/avance-02) siguen disponibles en la revisión
-académica. El motor vigente está en [native/](native/) y la aplicación de
-escritorio en [python/src/orvix/](python/src/orvix/).
+académica. El motor vigente está en [src/native/](src/native/) y la aplicación de
+escritorio en [src/python/src/orvix/](src/python/src/orvix/).
 
 [English](README.md) | [Español](README.es.md)
 

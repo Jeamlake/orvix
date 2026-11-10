@@ -110,7 +110,7 @@ nativo. Las pruebas nuevas reprodujeron y luego verificaron estas correcciones:
 CI incluye ahora un job de escritorio Windows con PySide6, pruebas offscreen
 y ciclo de vida del Bridge real. Los jobs existentes de núcleo y Python siguen
 cubriendo Windows, Linux, macOS y Python 3.8. El instalador se genera con
-`scripts/package-desktop.ps1`; los binarios permanecen excluidos de Git.
+`tools/scripts/package-desktop.ps1`; los binarios permanecen excluidos de Git.
 
 ## Documentación académica anterior
 

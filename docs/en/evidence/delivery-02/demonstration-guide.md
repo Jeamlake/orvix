@@ -12,8 +12,8 @@ From Git Bash in the ORVIX root:
 ./scripts/test.sh
 ```
 
-PowerShell users can run `scripts\setup.ps1`, `scripts\build.ps1` and
-`scripts\test.ps1`.
+PowerShell users can run `tools\scripts\setup.ps1`, `tools\scripts\build.ps1` and
+`tools\scripts\test.ps1`.
 
 ## Physical webcam demonstration
 

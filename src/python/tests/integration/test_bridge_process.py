@@ -16,7 +16,7 @@ def _executable(root: Path) -> Path:
 
 @pytest.mark.integration
 def test_synthetic_native_producer_reaches_python_consumer():
-    root = Path(__file__).resolve().parents[3]
+    root = Path(__file__).resolve().parents[4]
     executable = _executable(root)
     if not executable.exists():
         raise AssertionError("Native ORVIX executable was not built: {}".format(executable))
@@ -65,7 +65,7 @@ def test_synthetic_native_producer_reaches_python_consumer():
 def test_continuous_bridge_stops_only_on_explicit_owner_request():
     from orvix.ipc import SharedMemoryReader
 
-    root = Path(__file__).resolve().parents[3]
+    root = Path(__file__).resolve().parents[4]
     name = "orvix-stop-" + uuid.uuid4().hex[:16]
     producer = subprocess.Popen([str(_executable(root)), "bridge", "--synthetic",
                                  "--continuous", "--name", name], cwd=str(root),

@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-$OrvixRoot = (Split-Path $PSScriptRoot -Parent)
+$OrvixRoot = (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent)
 $OrvixArchivePath = Join-Path $OrvixRoot 'out/release/ORVIX-Codigo-1.0.0.zip'
 New-Item -ItemType Directory -Path (Split-Path $OrvixArchivePath -Parent) -Force | Out-Null
 $OrvixTemporaryArchivePath = Join-Path (Split-Path $OrvixArchivePath -Parent) ('.orvix-source-' + [Guid]::NewGuid().ToString('N') + '.zip')
@@ -7,7 +7,7 @@ $OrvixCandidates = & git -C $OrvixRoot ls-files --cached --others --exclude-stan
 if ($LASTEXITCODE -ne 0) { throw 'Unable to enumerate repository source.' }
 # Include technical docs and exclude academic sources and deliverables.
 $OrvixSourceFiles = $OrvixCandidates | Where-Object {
-    $_ -match '^(native/|python/src/|python/tests/|scripts/|packaging/|docs/(?!(?:[^/]+/)?academic/)|config/orvix\.example\.toml$|\.github/workflows/|CMakeLists\.txt$|pyproject\.toml$|LICENSE$|README(\.es)?\.md$|\.gitignore$)'
+    $_ -match '^(src/native/|src/python/src/|src/python/tests/|tools/scripts/|tools/packaging/|docs/(?!(?:[^/]+/)?academic/)|\.github/workflows/|CMakeLists\.txt$|pyproject\.toml$|LICENSE$|README(\.es)?\.md$|\.gitignore$)'
 }
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem

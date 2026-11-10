@@ -3,7 +3,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$Root = Split-Path $PSScriptRoot -Parent
+$Root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $Venv = Join-Path $Root ".venv"
 
 py "-$PythonVersion" -m venv $Venv

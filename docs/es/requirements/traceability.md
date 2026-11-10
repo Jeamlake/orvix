@@ -34,7 +34,7 @@ Consulta la [validación de ORVIX 1.0](../release-1.0.md) para el alcance de las
 | RF-026 | Todos | 1 | TC-LOG-001 | Verificado |
 | RF-027 | Capture | 1 | TC-CAP-003-PLATFORM | Verificado |
 
-Interfaz desktop de la entrega 2: `python/tests/test_desktop.py` cubre layout,
+Interfaz desktop de la entrega 2: `src/python/tests/test_desktop.py` cubre layout,
 inicio/parada/reinicio, fallo nativo, índice inválido, cancelación y reconexión
 del consumidor sin reiniciar Capture. La evidencia y los límites de validación
 se describen en [desktop-validation.md](../evidence/delivery-02/desktop-validation.md).

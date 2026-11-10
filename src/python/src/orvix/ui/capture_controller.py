@@ -47,7 +47,7 @@ def find_engine(explicit: Optional[str] = None) -> Path:
     elif getattr(sys, "frozen", False):
         candidates = [Path(sys._MEIPASS) / "native" / "orvix-capture.exe"]
     else:
-        root = Path(__file__).resolve().parents[4]
+        root = Path(__file__).resolve().parents[5]
         name = "orvix-capture.exe" if os.name == "nt" else "orvix-capture"
         candidates = [root / "build/native/Release" / name, root / "build/native" / name]
     for candidate in candidates:

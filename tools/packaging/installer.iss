@@ -30,7 +30,7 @@ SolidCompression=yes
 WizardStyle=modern
 CloseApplications=yes
 RestartApplications=no
-LicenseFile=..\LICENSE
+LicenseFile=..\..\LICENSE
 
 [Languages]
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
