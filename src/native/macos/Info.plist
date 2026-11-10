@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Indica que el documento usa el formato plist de Apple. -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Abre el contenedor de propiedades de macOS. -->
+<plist version="1.0">
+<!-- Agrupa las propiedades del ejecutable nativo. -->
+<dict>
+    <!-- Identifica el ejecutable de captura ante macOS. -->
+    <key>CFBundleIdentifier</key>
+    <!-- Asigna a la propiedad el texto com.orvix.capture. -->
+    <string>com.orvix.capture</string>
+    <!-- Declara el nombre visible del ejecutable. -->
+    <key>CFBundleName</key>
+    <!-- Asigna a la propiedad el texto ORVIX Capture. -->
+    <string>ORVIX Capture</string>
+    <!-- Declara la versión del paquete nativo. -->
+    <key>CFBundleVersion</key>
+    <!-- Asigna a la propiedad el texto 0.2.0. -->
+    <string>0.2.0</string>
+    <!-- Declara el motivo que macOS muestra al pedir acceso a la cámara. -->
+    <key>NSCameraUsageDescription</key>
+    <!-- Asigna a la propiedad el texto ORVIX uses the selected camera to capture ephemeral video frames. -->
+    <string>ORVIX uses the selected camera to capture ephemeral video frames.</string>
+</dict>
+</plist>

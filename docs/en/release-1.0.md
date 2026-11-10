@@ -21,12 +21,12 @@ From the source directory, with Python 3.11 or 3.13, CMake, MSVC and the Windows
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e '.[dev,desktop,package]'
-.\scripts\build.ps1
+.\tools\scripts\build.ps1
 ctest --test-dir build -C Release --output-on-failure
 $env:QT_QPA_PLATFORM = 'offscreen'
 .\.venv\Scripts\python.exe -m pytest -o addopts=''
-.\.venv\Scripts\python.exe scripts/benchmark.py build/native/Release/orvix-capture.exe --output benchmark-win-x64.json
-.\scripts\package-desktop.ps1 -Portable -SkipBuild
+.\.venv\Scripts\python.exe tools/scripts/benchmark.py build/native/Release/orvix-capture.exe --output benchmark-win-x64.json
+.\tools\scripts\package-desktop.ps1 -Portable -SkipBuild
 ```
 
 The portable build is written to `out/desktop-package/dist/ORVIX`. With Inno

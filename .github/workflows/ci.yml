@@ -1,114 +1,223 @@
+# Nombra este flujo, trabajo o paso en GitHub Actions con CI.
 name: CI
 
+# Define los eventos que activan el flujo.
 on:
+  # Configura la ejecución cuando se suben cambios.
   push:
+    # Limita el evento a las ramas indicadas.
     branches:
+      # Agrega main a las opciones anteriores.
       - main
+      # Agrega "feature/**" a las opciones anteriores.
       - "feature/**"
+      # Agrega "fix/**" a las opciones anteriores.
       - "fix/**"
+      # Agrega "docs/**" a las opciones anteriores.
       - "docs/**"
+      # Agrega "test/**" a las opciones anteriores.
       - "test/**"
+  # Configura la ejecución para solicitudes de integración.
   pull_request:
+    # Limita el evento a las ramas indicadas.
     branches:
+      # Agrega main a las opciones anteriores.
       - main
 
+# Agrupa los trabajos del flujo.
 jobs:
+  # Configura la sección o el trabajo native.
   native:
+    # Nombra este flujo, trabajo o paso en GitHub Actions con Native C++ (${{ matrix.platform }}).
     name: Native C++ (${{ matrix.platform }})
+    # Define cómo ejecutar las variantes del trabajo.
     strategy:
+      # Decide si un fallo cancela otras variantes con false.
       fail-fast: false
+      # Genera variantes de plataforma para el trabajo.
       matrix:
+        # Agrega combinaciones a la matriz.
         include:
+          # Selecciona la imagen del sistema operativo con windows-latest.
           - os: windows-latest
+            # Identifica la plataforma nativa que se valida con Windows-Media-Foundation.
             platform: Windows-Media-Foundation
+          # Selecciona la imagen del sistema operativo con ubuntu-latest.
           - os: ubuntu-latest
+            # Identifica la plataforma nativa que se valida con Linux-V4L2.
             platform: Linux-V4L2
+          # Selecciona la imagen del sistema operativo con macos-latest.
           - os: macos-latest
+            # Identifica la plataforma nativa que se valida con macOS-AVFoundation.
             platform: macOS-AVFoundation
+    # Elige el sistema que ejecuta el trabajo con ${{ matrix.os }}.
     runs-on: ${{ matrix.os }}
+    # Ordena los pasos que ejecuta el trabajo.
     steps:
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Checkout.
       - name: Checkout
+        # Invoca la acción de GitHub indicada con actions/checkout@v5.
         uses: actions/checkout@v5
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Configure Windows.
       - name: Configure Windows
+        # Condiciona la ejecución de este paso con runner.os == 'Windows'.
         if: runner.os == 'Windows'
+        # Ejecuta los comandos de validación indicados con cmake -S . -B build -A x64.
         run: cmake -S . -B build -A x64
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Configure Unix.
       - name: Configure Unix
+        # Condiciona la ejecución de este paso con runner.os != 'Windows'.
         if: runner.os != 'Windows'
+        # Ejecuta los comandos de validación indicados con cmake -S . -B build -DCMAKE_BUILD_TYPE=Release.
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Validate portable shell scripts.
       - name: Validate portable shell scripts
+        # Indica el intérprete que ejecuta el comando con bash.
         shell: bash
-        run: sh -n scripts/setup.sh scripts/build.sh scripts/test.sh
+        # Ejecuta los comandos de validación indicados con sh -n tools/scripts/setup.sh tools/scripts/build.sh tools/scripts/test.sh.
+        run: sh -n tools/scripts/setup.sh tools/scripts/build.sh tools/scripts/test.sh
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Build.
       - name: Build
+        # Ejecuta los comandos de validación indicados con cmake --build build --config Release --parallel.
         run: cmake --build build --config Release --parallel
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Test.
       - name: Test
+        # Ejecuta los comandos de validación indicados con ctest --test-dir build -C Release --output-on-failure.
         run: ctest --test-dir build -C Release --output-on-failure
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Python 3.11.
       - name: Python 3.11
+        # Invoca la acción de GitHub indicada con actions/setup-python@v6.
         uses: actions/setup-python@v6
+        # Pasa los parámetros a la acción.
         with:
+          # Selecciona la versión de Python del trabajo con "3.11".
           python-version: "3.11"
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Install bridge validation dependencies.
       - name: Install bridge validation dependencies
+        # Ejecuta los comandos de validación indicados con python -m pip install -e ".[dev,vision]".
         run: python -m pip install -e ".[dev,vision]"
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Test native-to-Python bridge.
       - name: Test native-to-Python bridge
-        run: python -m pytest -m integration python/tests/integration/test_bridge_process.py
+        # Ejecuta los comandos de validación indicados con python -m pytest -m integration src/python/tests/integration/test_bridge_process.py.
+        run: python -m pytest -m integration src/python/tests/integration/test_bridge_process.py
 
+  # Configura la sección o el trabajo python.
   python:
+    # Nombra este flujo, trabajo o paso en GitHub Actions con Python 3.11 (${{ matrix.os }}).
     name: Python 3.11 (${{ matrix.os }})
+    # Define cómo ejecutar las variantes del trabajo.
     strategy:
+      # Decide si un fallo cancela otras variantes con false.
       fail-fast: false
+      # Genera variantes de plataforma para el trabajo.
       matrix:
+        # Selecciona la imagen del sistema operativo.
         os:
+          # Agrega windows-latest a las opciones anteriores.
           - windows-latest
+          # Agrega ubuntu-latest a las opciones anteriores.
           - ubuntu-latest
+          # Agrega macos-latest a las opciones anteriores.
           - macos-latest
+    # Elige el sistema que ejecuta el trabajo con ${{ matrix.os }}.
     runs-on: ${{ matrix.os }}
+    # Ordena los pasos que ejecuta el trabajo.
     steps:
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Checkout.
       - name: Checkout
+        # Invoca la acción de GitHub indicada con actions/checkout@v5.
         uses: actions/checkout@v5
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Python 3.11.
       - name: Python 3.11
+        # Invoca la acción de GitHub indicada con actions/setup-python@v6.
         uses: actions/setup-python@v6
+        # Pasa los parámetros a la acción.
         with:
+          # Selecciona la versión de Python del trabajo con "3.11".
           python-version: "3.11"
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Install.
       - name: Install
+        # Ejecuta los comandos de validación indicados.
+        # Instala o actualiza dependencias Python con python -m pip install --upgrade pip.
+        # Instala o actualiza dependencias Python con python -m pip install -e ".[dev,vision]".
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev,vision]"
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Test.
       - name: Test
+        # Ejecuta los comandos de validación indicados con python -m pytest.
         run: python -m pytest
 
+  # Configura la sección o el trabajo desktop.
   desktop:
+    # Nombra este flujo, trabajo o paso en GitHub Actions con Windows desktop lifecycle.
     name: Windows desktop lifecycle
+    # Elige el sistema que ejecuta el trabajo con windows-latest.
     runs-on: windows-latest
+    # Establece variables de entorno para el trabajo.
     env:
+      # Ejecuta Qt fuera de pantalla durante las pruebas con offscreen.
       QT_QPA_PLATFORM: offscreen
+    # Ordena los pasos que ejecuta el trabajo.
     steps:
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Checkout.
       - name: Checkout
+        # Invoca la acción de GitHub indicada con actions/checkout@v5.
         uses: actions/checkout@v5
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Python 3.11.
       - name: Python 3.11
+        # Invoca la acción de GitHub indicada con actions/setup-python@v6.
         uses: actions/setup-python@v6
+        # Pasa los parámetros a la acción.
         with:
+          # Selecciona la versión de Python del trabajo con "3.11".
           python-version: "3.11"
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Install desktop test dependencies.
       - name: Install desktop test dependencies
+        # Ejecuta los comandos de validación indicados con python -m pip install -e ".[dev,desktop]".
         run: python -m pip install -e ".[dev,desktop]"
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Configure native engine.
       - name: Configure native engine
+        # Ejecuta los comandos de validación indicados con cmake -S . -B build -A x64.
         run: cmake -S . -B build -A x64
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Build native engine.
       - name: Build native engine
+        # Ejecuta los comandos de validación indicados con cmake --build build --config Release --parallel.
         run: cmake --build build --config Release --parallel
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Test desktop and real bridge lifecycle.
       - name: Test desktop and real bridge lifecycle
-        run: python -m pytest -o addopts="" python/tests/test_desktop.py
+        # Ejecuta los comandos de validación indicados con python -m pytest -o addopts="" src/python/tests/test_desktop.py.
+        run: python -m pytest -o addopts="" src/python/tests/test_desktop.py
 
+  # Configura la sección o el trabajo python-legacy.
   python-legacy:
+    # Nombra este flujo, trabajo o paso en GitHub Actions con Python 3.8 compatibility.
     name: Python 3.8 compatibility
+    # Elige el sistema que ejecuta el trabajo con windows-latest.
     runs-on: windows-latest
+    # Ordena los pasos que ejecuta el trabajo.
     steps:
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Checkout.
       - name: Checkout
+        # Invoca la acción de GitHub indicada con actions/checkout@v5.
         uses: actions/checkout@v5
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Python 3.8.
       - name: Python 3.8
+        # Invoca la acción de GitHub indicada con actions/setup-python@v6.
         uses: actions/setup-python@v6
+        # Pasa los parámetros a la acción.
         with:
+          # Selecciona la versión de Python del trabajo con "3.8".
           python-version: "3.8"
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Install.
       - name: Install
+        # Ejecuta los comandos de validación indicados.
+        # Instala o actualiza dependencias Python con python -m pip install --upgrade pip.
+        # Instala o actualiza dependencias Python con python -m pip install -e ".[dev,vision]".
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev,vision]"
+      # Nombra este flujo, trabajo o paso en GitHub Actions con Test.
       - name: Test
+        # Ejecuta los comandos de validación indicados con python -m pytest.
         run: python -m pytest

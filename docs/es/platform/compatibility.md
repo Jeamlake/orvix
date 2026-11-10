@@ -30,9 +30,9 @@ Requisitos:
 - Python 3.11 recomendado.
 
 ```powershell
-.\scripts\setup.ps1
-.\scripts\build.ps1
-.\scripts\test.ps1
+.\tools\scripts\setup.ps1
+.\tools\scripts\build.ps1
+.\tools\scripts\test.ps1
 .\build\native\Release\orvix-capture.exe devices
 .\build\native\Release\orvix-capture.exe capture --index 0
 ```
@@ -63,7 +63,7 @@ predeterminada `ORVIX_WINDOWS_7_COMPAT=ON` limita las declaraciones Win32 a la
 versión 6.1 y enlaza estáticamente el runtime de MSVC.
 
 ```powershell
-.\scripts\setup.ps1 -PythonVersion 3.8
+.\tools\scripts\setup.ps1 -PythonVersion 3.8
 cmake -S . -B build -G "Visual Studio 16 2019" -A x64 -DORVIX_WINDOWS_7_COMPAT=ON
 cmake --build build --config Release --parallel
 ctest --test-dir build -C Release --output-on-failure

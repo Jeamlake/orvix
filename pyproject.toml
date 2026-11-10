@@ -1,47 +1,83 @@
+# Delimita las opciones de build-system.
 [build-system]
+# Declara las dependencias necesarias para construir el paquete con ["setuptools>=69", "wheel"].
 requires = ["setuptools>=69", "wheel"]
+# Selecciona el backend de empaquetado Python con "setuptools.build_meta".
 build-backend = "setuptools.build_meta"
 
+# Delimita las opciones de project.
 [project]
+# Indica el nombre del paquete con "orvix".
 name = "orvix"
+# Declara la versión del paquete con "1.0.0".
 version = "1.0.0"
+# Describe el propósito del paquete con "Optical Real-time Video Ingestion eXchange".
 description = "Optical Real-time Video Ingestion eXchange"
+# Acota las versiones de Python que admite el paquete con ">=3.8,<3.14".
 requires-python = ">=3.8,<3.14"
+# Indica la licencia del código con {text = "MIT"}.
 license = {text = "MIT"}
+# Declara las dependencias base con [].
 dependencies = []
 
+# Delimita las opciones de project.scripts.
 [project.scripts]
+# Registra el punto de entrada del visor de consola con "orvix.ui.viewer:main".
 orvix-viewer = "orvix.ui.viewer:main"
+# Registra el punto de entrada de la interfaz de escritorio con "orvix.ui.desktop:main".
 orvix-desktop = "orvix.ui.desktop:main"
 
+# Delimita las opciones de project.optional-dependencies.
 [project.optional-dependencies]
+# Agrupa las dependencias de la aplicación gráfica con [.
 desktop = [
+    # Configura "PySide6-Essentials> con 6.8,<6.9; python_version >= '3.9'",.
     "PySide6-Essentials>=6.8,<6.9; python_version >= '3.9'",
+    # Configura "numpy> con 1.26,<3; python_version >= '3.9'",.
     "numpy>=1.26,<3; python_version >= '3.9'",
+    # Configura "opencv-python> con 4.8,<5; python_version >= '3.9'".
     "opencv-python>=4.8,<5; python_version >= '3.9'"
 ]
+# Agrupa las herramientas para distribuir la aplicación con ["pyinstaller>=6.11,<7; python_version >= '3.9'"].
 package = ["pyinstaller>=6.11,<7; python_version >= '3.9'"]
+# Agrupa las dependencias de procesamiento de imágenes con [.
 vision = [
+    # Configura "numpy> con 1.24,<2; python_version < '3.9'",.
     "numpy>=1.24,<2; python_version < '3.9'",
+    # Configura "numpy> con 1.26,<3; python_version >= '3.9'",.
     "numpy>=1.26,<3; python_version >= '3.9'",
+    # Configura "opencv-python> con 4.8,<5".
     "opencv-python>=4.8,<5"
 ]
+# Agrupa las dependencias de pruebas y desarrollo con [.
 dev = [
+    # Configura "pytest> con 8,<9".
     "pytest>=8,<9"
 ]
 
+# Delimita las opciones de tool.setuptools.
 [tool.setuptools]
-package-dir = {"" = "python/src"}
+# Relaciona el paquete Python con su carpeta de código con {"" = "src/python/src"}.
+package-dir = {"" = "src/python/src"}
 
+# Delimita las opciones de tool.setuptools.packages.find.
 [tool.setuptools.packages.find]
-where = ["python/src"]
+# Indica dónde buscar los paquetes Python con ["src/python/src"].
+where = ["src/python/src"]
 
+# Delimita las opciones de tool.setuptools.package-data.
 [tool.setuptools.package-data]
+# Configura "orvix.ui" con ["assets/*.svg"].
 "orvix.ui" = ["assets/*.svg"]
 
+# Delimita las opciones de tool.pytest.ini_options.
 [tool.pytest.ini_options]
-testpaths = ["python/tests"]
+# Selecciona las rutas de pruebas de pytest con ["src/python/tests"].
+testpaths = ["src/python/tests"]
+# Indica las opciones predeterminadas de pytest con "-ra -m 'not integration'".
 addopts = "-ra -m 'not integration'"
+# Declara los marcadores de la suite con [.
 markers = [
+    # Agrega "integration: exercises the native C++ producer and Python consumer together" a la lista de configuración.
     "integration: exercises the native C++ producer and Python consumer together"
 ]

@@ -1,17 +1,30 @@
+# Configura root con true.
 root = true
 
+# Delimita las opciones de *.
 [*]
+# Configura charset con utf-8.
 charset = utf-8
+# Configura end_of_line con lf.
 end_of_line = lf
+# Configura insert_final_newline con true.
 insert_final_newline = true
+# Configura indent_style con space.
 indent_style = space
+# Configura indent_size con 4.
 indent_size = 4
 
+# Delimita las opciones de *.md.
 [*.md]
+# Configura trim_trailing_whitespace con false.
 trim_trailing_whitespace = false
 
+# Delimita las opciones de *.ps1.
 [*.ps1]
+# Configura end_of_line con crlf.
 end_of_line = crlf
 
+# Delimita las opciones de *.yml.
 [*.yml]
+# Configura indent_size con 2.
 indent_size = 2

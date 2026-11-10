@@ -12,8 +12,8 @@ En Git Bash, desde la raíz de ORVIX:
 ./scripts/test.sh
 ```
 
-En PowerShell se pueden usar `scripts\setup.ps1`, `scripts\build.ps1` y
-`scripts\test.ps1`.
+En PowerShell se pueden usar `tools\scripts\setup.ps1`, `tools\scripts\build.ps1` y
+`tools\scripts\test.ps1`.
 
 ## Demostración con webcam
 

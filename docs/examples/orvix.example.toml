@@ -1,0 +1,36 @@
+# Ejemplo histórico de configuración. En ORVIX 1.0 se usa Ajustes en la app
+# o los argumentos de orvix-capture bridge y orvix-viewer en la terminal.
+# Delimita las opciones de capture.
+[capture]
+# Configura device_index con 0.
+device_index = 0
+# Configura width (ancho en píxeles) con 1280.
+width = 1280
+# Configura height (alto en píxeles) con 720.
+height = 720
+# Configura fps con 30.
+fps = 30
+
+# Delimita las opciones de bridge.
+[bridge]
+# Configura shared_memory_name con "orvix-camera-v1".
+shared_memory_name = "orvix-camera-v1"
+# Configura slot_count (cantidad de posiciones del anillo) con 3.
+slot_count = 3
+# Configura default_frames con 900.
+default_frames = 900
+
+# Delimita las opciones de logging.
+[logging]
+# Configura level con "INFO".
+level = "INFO"
+
+# Delimita las opciones de vision.
+[vision]
+# Configura mode (modo de procesamiento) con "raw".
+mode = "raw"
+
+# Delimita las opciones de telemetry.
+[telemetry]
+# Configura sample_interval_seconds con 1.
+sample_interval_seconds = 1

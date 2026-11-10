@@ -1,46 +1,87 @@
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con build/.
 build/
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con out/.
 out/
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con bootstrap-build/.
 bootstrap-build/
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con CMakeCache.txt.
 CMakeCache.txt
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con CMakeFiles/.
 CMakeFiles/
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.obj.
 *.obj
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.o.
 *.o
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.exe.
 *.exe
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.dll.
 *.dll
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.lib.
 *.lib
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.pdb.
 *.pdb
 
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con .venv/.
 .venv/
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con .bootstrap-venv/.
 .bootstrap-venv/
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con venv/.
 venv/
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con __pycache__/.
 __pycache__/
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.py[cod].
 *.py[cod]
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con .pytest_cache/.
 .pytest_cache/
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.egg-info/.
 *.egg-info/
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con dist/.
 dist/
 
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con logs/.
 logs/
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.log.
 *.log
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.db.
 *.db
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.sqlite.
 *.sqlite
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.sqlite3.
 *.sqlite3
 
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.mp4.
 *.mp4
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.avi.
 *.avi
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.mov.
 *.mov
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *.mkv.
 *.mkv
 
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con .vs/.
 .vs/
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con .idea/.
 .idea/
 
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con Thumbs.db.
 Thumbs.db
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con Desktop.ini.
 Desktop.ini
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con .DS_Store.
 .DS_Store
 
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con .env.
 .env
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con .env.*.
 .env.*
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con config/orvix.toml.
 config/orvix.toml
-!config/orvix.example.toml
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con docs/examples/orvix.toml.
+docs/examples/orvix.toml
+# Vuelve a incluir las rutas que coinciden con docs/examples/orvix.example.toml.
+!docs/examples/orvix.example.toml
 
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *_audit_*.txt.
 *_audit_*.txt
+# Excluye del seguimiento nuevos archivos o carpetas que coinciden con *_validation_*.txt.
 *_validation_*.txt

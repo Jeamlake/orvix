@@ -32,7 +32,7 @@ See [ORVIX 1.0 validation](../release-1.0.md) for the scope of the new checks.
 | RF-026 | All | 1 | TC-LOG-001 | Verified |
 | RF-027 | Capture | 1 | TC-CAP-003-PLATFORM | Verified |
 
-Delivery 2 desktop tests in `python/tests/test_desktop.py` cover layout,
+Delivery 2 desktop tests in `src/python/tests/test_desktop.py` cover layout,
 start/stop/restart, native failures, invalid indexes, startup cancellation and
 consumer reconnection without restarting Capture. Validation scope and limits
 are recorded in [desktop-validation.md](../evidence/delivery-02/desktop-validation.md).
