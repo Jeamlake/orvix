@@ -12,7 +12,10 @@ In the Windows x64 distribution, extract the entire
 demo. See the [ORVIX 1.0 guide](docs/en/release-1.0.md) for source builds,
 reproducible benchmarks and packaging.
 
-The earlier academic documents are archived under `entregables`.
+The [Avance 2 report, slides and source ZIP](https://github.com/Jeamlake/orvix/tree/8e88e67e717c72a161c509cb90a50161f63f7f48/entregables/Avance2_ORVIX_2026-10-11) and
+[their source documents and mockups](https://github.com/Jeamlake/orvix/tree/8e88e67e717c72a161c509cb90a50161f63f7f48/docs/es/academic/avance-02) remain available in the
+academic snapshot. The active engine is in [native/](native/) and the desktop
+application is in [python/src/orvix/](python/src/orvix/).
 
 [English](README.md) | [Español](README.es.md)
 

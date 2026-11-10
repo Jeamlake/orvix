@@ -5,9 +5,9 @@ New-Item -ItemType Directory -Path (Split-Path $OrvixArchivePath -Parent) -Force
 $OrvixTemporaryArchivePath = Join-Path (Split-Path $OrvixArchivePath -Parent) ('.orvix-source-' + [Guid]::NewGuid().ToString('N') + '.zip')
 $OrvixCandidates = & git -C $OrvixRoot ls-files --cached --others --exclude-standard
 if ($LASTEXITCODE -ne 0) { throw 'Unable to enumerate repository source.' }
-# Explicit scope: no .git, environments, logs, databases or user attachments.
+# Include technical docs and exclude academic sources and deliverables.
 $OrvixSourceFiles = $OrvixCandidates | Where-Object {
-    $_ -match '^(native/|python/src/|python/tests/|scripts/|packaging/|docs/|config/orvix\.example\.toml$|\.github/workflows/|CMakeLists\.txt$|pyproject\.toml$|LICENSE$|README(\.es)?\.md$|\.gitignore$)'
+    $_ -match '^(native/|python/src/|python/tests/|scripts/|packaging/|docs/(?!(?:[^/]+/)?academic/)|config/orvix\.example\.toml$|\.github/workflows/|CMakeLists\.txt$|pyproject\.toml$|LICENSE$|README(\.es)?\.md$|\.gitignore$)'
 }
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem

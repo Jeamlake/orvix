@@ -60,8 +60,10 @@ Esto no equivale a un benchmark de la webcam ni a pruebas en todos los SO.
 
 ## Distribución
 
-Instalador: `ORVIX-Avance2-Setup-0.2.1.exe` en
-`entregables/Avance2_ORVIX_2026-10-11/Aplicacion`.
+El instalador evaluado fue `ORVIX-Avance2-Setup-0.2.1.exe`. El
+[ZIP de código y las instrucciones de esa entrega](https://github.com/Jeamlake/orvix/tree/8e88e67e717c72a161c509cb90a50161f63f7f48/entregables/Avance2_ORVIX_2026-10-11/Aplicacion)
+se conservan en la revisión académica. Para generar un instalador de la
+versión vigente, consulta la [guía de ORVIX 1.0](../../release-1.0.md).
 
 PyInstaller empaqueta Python, Qt, NumPy, OpenCV y el motor en una distribución
 onedir. Inno Setup instala por usuario en `%LOCALAPPDATA%/Programs/ORVIX`,

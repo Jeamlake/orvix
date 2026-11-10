@@ -129,5 +129,5 @@ $demo.ExitCode
 
 La ventana abre la fuente sintética en modo Movimiento y se cierra al terminar.
 El código 0 indica que procesó frames y detuvo el motor. El historial y logs
-de esa sesión quedan en `demo-evidencia`. Los Word y PowerPoint del Avance 2
-son antecedentes académicos y se conservan en `entregables`.
+de esa sesión quedan en `demo-evidencia`. El Word y el PowerPoint del
+[Avance 2](https://github.com/Jeamlake/orvix/tree/8e88e67e717c72a161c509cb90a50161f63f7f48/entregables/Avance2_ORVIX_2026-10-11) se conservan en la revisión académica.
